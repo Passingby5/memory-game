@@ -4,10 +4,10 @@ const fs = require('fs'), path = require('path'), crypto = require('crypto'), { 
 const { ORDER } = require('./tests/load.js');
 const errs = require('./tools/checkdecks.js').check(); if (errs.length) { console.error('Deck check failed:\n' + errs.join('\n')); process.exit(1); }
 const r = f => fs.readFileSync(path.join(__dirname, 'src', f), 'utf8');
-const VERSION = 3, DATE = 'Oct 20';
+const VERSION = 4, DATE = 'Oct 20';
 let commit = process.env.COMMIT || ''; if (!commit) { try { commit = execSync('git rev-parse HEAD', { cwd: __dirname, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch (e) { commit = 'local'; } }
 const LABEL = 'v' + VERSION + ' - ' + DATE + ' - ' + commit.slice(0, 7);
-const scripts = ORDER.concat(['ui/ui.js']);
+const scripts = ORDER.concat(['ui/trainers.js', 'ui/ui.js']);
 const id = crypto.createHash('sha1').update(scripts.map(r).join('') + r('ui/style.css') + r('ui/body.html') + LABEL).digest('hex').slice(0, 8);
 const js = single => `<script>var MG_BUILD = { label: ${JSON.stringify(LABEL)}, id: "${id}" };${single ? ' window.MG_SINGLE = true;' : ''}</script>\n` + scripts.map(f => `<script data-src="${f}">\n${r(f)}</script>`).join('\n');
 const reg = `<script>

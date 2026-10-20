@@ -18,18 +18,21 @@ button.right{background:#2e7d4f}button.wrong{background:#9b3b3b}button:disabled{
 .src a{color:#9fd3ff;word-break:break-all;display:inline-block;min-height:48px;line-height:48px}
 .row{display:flex;gap:10px}.row>*{flex:1}
 @media (orientation:landscape) and (max-height:500px){#app{max-width:none;padding:8px 24px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}h1{font-size:24px}}
+.big{font-size:40px;text-align:center;font-weight:700;min-height:90px;display:flex;align-items:center;justify-content:center;letter-spacing:4px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:0 10px}.pad button{text-align:center;font-size:24px}
+.tapped{outline:4px solid #f4c542}
 </style></head>
 <body>
 <div id="app"></div>
 
-<script>var MG_BUILD = { label: "v3 - Oct 20 - 07ff9b3", id: "ef243685" };</script>
+<script>var MG_BUILD = { label: "v4 - Oct 20 - 907f7f7", id: "f089860f" };</script>
 <script data-src="sections.js">
 // Home screen section list (data only).
 var MG = typeof MG !== 'undefined' ? MG : {};
 MG.SECTIONS = [
   { id: 'herbs', title: 'Herbs', blurb: 'Dr. Patrick Jones herbs and formulas, Chinese hot and cold, symptom lookup', ready: true },
   { id: 'history', title: 'History', blurb: 'Uprisings, leaders and empires; Vietnam; Bible timeline', ready: true },
-  { id: 'memory', title: 'Memory Trainers', blurb: 'Spaced recall, memory palace, digit span, n-back', ready: false },
+  { id: 'memory', title: 'Memory Trainers', blurb: 'Spaced recall, memory palace, digit span, n-back', ready: true },
   { id: 'survival', title: 'Survival Science', blurb: 'Clean water, soap, food keeping, basic chemistry', ready: false },
   { id: 'truth', title: 'Truth or Lies', blurb: 'Claims people argue about, with the facts', ready: false },
   { id: 'vocab', title: 'GRE Vocab', blurb: 'English and Vietnamese word practice', ready: false }
@@ -219,6 +222,35 @@ MG.decks.history = { id: 'history', title: 'History', note: 'Real events, told p
 })();
 if (typeof module !== 'undefined') module.exports = MG;
 </script>
+<script data-src="decks/memory.js">
+// Memory research cards (data only). Used for the spaced recall trainer and the research notes.
+// Each card names the study in the "why" text; links go to Wikipedia summaries that cite those studies.
+var MG = typeof MG !== 'undefined' ? MG : {}; MG.decks = MG.decks || {};
+(function () {
+var W = function (t) { return 'https://en.wikipedia.org/wiki/' + encodeURIComponent(t.replace(/ /g, '_')); };
+var C = [
+['Spaced recall','Who first measured the "forgetting curve" by testing himself on nonsense syllables?','Hermann Ebbinghaus','Sigmund Freud of Vienna','Ivan Petrovich Pavlov','Ebbinghaus published Memory in 1885. He found most forgetting happens soon after learning, then slows.',['Forgetting curve','Hermann Ebbinghaus']],
+['Spaced recall','A 2006 review of 254 studies (Cepeda and others) found that spreading study out over time does what?','Improves long-term memory','Makes no difference','Only helps young children under ten','This is the spacing effect. The best gap grows the longer you want to remember something.',['Spacing effect']],
+['Spaced recall','Roediger and Karpicke (2006) found that, compared with rereading, practice testing leads to what?','Better recall a week later','Worse recall a week later','The same recall either way','This is the testing effect, or retrieval practice. Trying to recall strengthens memory more than reading again.',['Testing effect']],
+['Spaced recall','In the Leitner box system, what happens to a card you get wrong?','It goes back to box 1','It moves up one box higher','It is removed forever from the deck','Sebastian Leitner described it in 1972. Easy cards are seen less often and hard cards more often. This app uses it.',['Leitner system']],
+['Memory palace','The method of loci (memory palace) is linked by legend to which Greek poet?','Simonides of Ceos','Homer, the poet of the Iliad','Pindar of Thebes, the poet','Cicero tells the story: after a banquet hall collapsed, Simonides named the dead by remembering where each guest sat.',['Method of loci','Simonides of Ceos']],
+['Memory palace','In a memory palace, where do you "put" the things you want to remember?','Along a familiar route','In alphabetical order','On a blank page','You picture each item, in a vivid way, at a place along a path you know well, like rooms in your home.',['Method of loci']],
+['Memory palace','Dresler and others (2017) trained ordinary people in the method of loci for 40 days. What happened?','Word list recall more than doubled','Recall did not change at all','IQ scores went up 30 points','Recall went from about 26 to about 62 words out of 72 and lasted months. The study measured memory for lists, not IQ.',['Method of loci']],
+['Digit span','Classic research (Miller, 1956) put short-term memory span at about how many items?','Seven, plus or minus two','Two, plus or minus one','Twenty five, plus or minus five','Later work by Nelson Cowan (2001) suggests about four chunks when people cannot rehearse or group items.',['The Magical Number Seven, Plus or Minus Two']],
+['Digit span','After 230 hours of practice, a runner called "SF" raised his digit span from 7 to about 79. What about his span for letters?','It stayed about 6','It also rose to about 79 letters','It dropped to 2','Ericsson, Chase and Faloon (1980). He grouped digits as running times. The skill did not carry over to letters. This is near transfer.',['Memory span']],
+['Digit span','What is "chunking"?','Grouping items into bigger units','Repeating one item many times','Saying items out loud backward','Example: a phone number grouped as 619, 555, 0123 is easier to hold than 10 single digits.',['Chunking (psychology)']],
+['N-back','In a 2-back task, when do you tap "Match"?','When it matches the one 2 back','When it matches the one before','When it is a new letter','Wayne Kirchner described n-back tasks in 1958. Researchers use them to test working memory.',['N-back']],
+['N-back','A 2013 review (Melby-Lervag and Hulme) of working memory training found what?','Gains mostly on similar tasks','Large gains in general IQ','No gains on any task at all','People improve on the trained task and similar ones (near transfer). There was no convincing evidence of far transfer to IQ or reading.',['N-back','Brain training']],
+['N-back','In 2016 the US Federal Trade Commission fined the maker of which brain game for unproven claims?','Lumosity','Tetris by Alexey Pajitnov','Minecraft by Mojang','Lumos Labs paid $2 million to settle claims that its games could delay memory decline and boost school and work performance.',['Lumosity']],
+['Spaced recall','What does good sleep after learning do for memory?','Helps memories set and last','Erases what you learned that day','Has no effect','Studies reviewed by Diekelmann and Born (2010) show sleep helps consolidate new memories.',['Sleep and memory']]
+];
+MG.decks.memory = { id: 'memory', title: 'Memory Trainers', min: 12, note: 'What the research really says about memory training. Practice makes you better at what you practice (near transfer). Claims that brain games raise general intelligence are not well supported (Simons and others, 2016).', sets: ['Spaced recall', 'Memory palace', 'Digit span', 'N-back'],
+  cards: C.map(function (a, i) { return { id: 'm' + (i + 1), set: a[0], q: a[1], a: a[2], w: [a[3], a[4]], why: a[5], src: a[6].map(W) }; }) };
+MG.palace = { places: ['Front door', 'Welcome mat', 'Coat hook', 'Couch', 'TV', 'Kitchen table', 'Fridge', 'Kitchen sink'],
+  items: ['Eggs', 'Bread', 'Apples', 'Soap', 'Batteries', 'Rice', 'Milk', 'Tape', 'Onions', 'Nails', 'Honey', 'Socks'] };
+})();
+if (typeof module !== 'undefined') module.exports = MG;
+</script>
 <script data-src="engine.js">
 // Game logic: seeded RNG, Leitner spaced repetition, question builder, save versioning. No content here.
 var MG = typeof MG !== 'undefined' ? MG : {};
@@ -229,7 +261,7 @@ var MG = typeof MG !== 'undefined' ? MG : {};
   E.shuffle = function (a, r) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
   // Leitner: 5 boxes; box n is due again after INTERVAL[n] days. Right moves up one box, wrong goes back to box 1.
   E.INTERVAL = [0, 0, 1, 3, 7, 14]; E.DAY = 86400000;
-  E.newState = function () { return { v: E.SAVE_VERSION, seed: 12345, boxes: {}, stats: { right: 0, wrong: 0 }, session: null }; };
+  E.newState = function () { return { v: E.SAVE_VERSION, seed: 12345, boxes: {}, stats: { right: 0, wrong: 0 }, session: null, best: {} }; };
   E.grade = function (st, id, ok, now) { var b = st.boxes[id] || { box: 1, due: 0 }; b.box = ok ? Math.min(5, b.box + 1) : 1; b.due = now + E.INTERVAL[b.box] * E.DAY; st.boxes[id] = b; st.stats[ok ? 'right' : 'wrong']++; return b; };
   E.dueCards = function (st, cards, now) { return cards.filter(function (c) { var b = st.boxes[c.id]; return !b || b.due <= now; }).sort(function (a, b) { var x = st.boxes[a.id], y = st.boxes[b.id]; return (x ? x.box : 0) - (y ? y.box : 0); }); };
   // Save versioning: v1 kept a flat {leitner:{id:box}}; v2 stores {box,due}. Unknown or broken saves start fresh.
@@ -238,6 +270,7 @@ var MG = typeof MG !== 'undefined' ? MG : {};
     if (!s || typeof s !== 'object') return E.newState();
     if (s.v === 1) { var n = E.newState(); Object.keys(s.leitner || {}).forEach(function (k) { n.boxes[k] = { box: s.leitner[k], due: 0 }; }); n.stats = s.stats || n.stats; return n; }
     if (s.v !== E.SAVE_VERSION) return E.newState();
+    if (!s.best) s.best = {};
     return s;
   };
   // Question kinds. Choices are always 3 herb names, so the right answer cannot be spotted by wording or length alone.
@@ -257,15 +290,64 @@ var MG = typeof MG !== 'undefined' ? MG : {};
   E.mask = function (t, card) { var names = [card.name].concat(card.name.split(/[ ()]+/).filter(function (w) { return w.length > 4; })); names.forEach(function (n) { t = t.split(n).join('this herb').split(n.toLowerCase()).join('this herb'); }); return t; };
   // Generic multiple choice card {q, a, w:[2]}: choices are the answer plus two wrong answers, shuffled by the seeded RNG.
   E.mcq = function (card, r) { var ch = E.shuffle([card.a].concat(card.w), r); return { kind: 'mcq', id: card.id, prompt: card.q, choices: ch, answer: ch.indexOf(card.a) }; };
+  // Trainers. Digit span: random digits; length goes up after a right answer, down after a wrong one (minimum 3).
+  E.digits = function (r, n) { var s = ''; for (var i = 0; i < n; i++) s += Math.floor(r() * 10); return s; };
+  E.spanNext = function (len, ok) { return ok ? len + 1 : Math.max(3, len - 1); };
+  // N-back: sequence of letters where about rate of the positions (from n on) repeat the letter n back.
+  E.nback = function (r, n, len, rate) { var L = 'BCDFGHJKLMNPRSTV', s = []; for (var i = 0; i < len; i++) { if (i >= n && r() < rate) s.push(s[i - n]); else { var c; do { c = L[Math.floor(r() * L.length)]; } while (i >= n && c === s[i - n]); s.push(c); } } return s; };
+  E.nbackScore = function (seq, n, taps) { var hits = 0, misses = 0, fa = 0; seq.forEach(function (c, i) { var t = i >= n && seq[i - n] === c, p = taps.indexOf(i) >= 0; if (t && p) hits++; else if (t) misses++; else if (p) fa++; }); return { hits: hits, misses: misses, falseAlarms: fa, pct: Math.round(100 * hits / Math.max(1, hits + misses + fa)) }; };
+  E.palaceRound = function (r, P) { var items = E.shuffle(P.items, r).slice(0, P.places.length); return P.places.map(function (pl, i) { return { place: pl, item: items[i] }; }); };
   E.lookup = function (cards, sym) { return cards.filter(function (c) { return c.symptoms.indexOf(sym) >= 0; }); };
   E.allSymptoms = function (cards) { var s = {}; cards.forEach(function (c) { c.symptoms.forEach(function (x) { s[x] = 1; }); }); return Object.keys(s).sort(); };
 })();
 if (typeof module !== 'undefined') module.exports = MG;
 </script>
+<script data-src="ui/trainers.js">
+// Memory trainer screens: digit span, 2-back, memory palace. Spaced recall uses the generic deck practice on the memory research cards.
+(function () {
+  var E = MG.E, T = MG.trainers = {}, app = document.getElementById('app');
+  T.speed = function () { return window.MG_TRAIN_MS || 1000; };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var b = function (act, label, extra, cls) { return '<button data-act="' + act + '"' + (extra || '') + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</button>'; };
+  var timer = null; T.stop = function () { clearTimeout(timer); timer = null; };
+  T.menu = function (st) { var d = MG.decks.memory; return '<h1>Memory Trainers</h1><p class="doc">' + esc(d.note) + '</p><div class="grid">' +
+    b('start', 'Spaced recall<small>Research cards with Leitner boxes</small>', ' data-deck="memory"') +
+    b('palace', 'Memory palace<small>Best: ' + (st.best.palace || 0) + ' of 8</small>') +
+    b('span', 'Digit span<small>Best: ' + (st.best.span || 0) + ' digits</small>') +
+    b('nback', '2-back<small>Best: ' + (st.best.nback || 0) + '%</small>') +
+    b('cards', 'Research notes and sources', ' data-deck="memory"') + '</div>' + b('home', 'Back', '', 'back'); };
+  // Digit span
+  T.span = { len: 3, strikes: 0, cur: '', typed: '' };
+  T.spanStart = function (st, r) { var S = T.span; S.cur = E.digits(r, S.len); S.typed = ''; var i = 0;
+    app.innerHTML = '<h1>Digit span</h1><p>Watch the digits, then type them in order. Length: ' + S.len + '</p><div class="card big" id="flash">Get ready</div>';
+    (function tick() { var f = document.getElementById('flash'); if (!f) return; if (i < S.cur.length) { f.textContent = S.cur[i++]; timer = setTimeout(function () { f.textContent = ''; timer = setTimeout(tick, 200); }, T.speed()); } else T.spanPad(); })(); };
+  T.spanPad = function () { var S = T.span; app.innerHTML = '<h1>Digit span</h1><p>Type the ' + S.len + ' digits.</p><div class="card big" id="typed">' + (esc(S.typed) || '&nbsp;') + '</div><div class="pad">' + '1234567890'.split('').map(function (d) { return b('digit', d, ' data-d="' + d + '"'); }).join('') + b('undo', 'Delete') + b('spandone', 'Done') + '</div>' + b('memory', 'Quit', '', 'back'); };
+  T.spanCheck = function (st) { var S = T.span, ok = S.typed === S.cur, msg; if (ok) { st.best.span = Math.max(st.best.span || 0, S.len); S.strikes = 0; } else S.strikes++;
+    msg = ok ? 'Right! ' + S.len + ' digits.' : 'It was ' + S.cur + '.'; S.len = E.spanNext(S.len, ok);
+    var end = S.strikes >= 2; if (end) { S.len = 3; S.strikes = 0; }
+    app.innerHTML = '<h1>Digit span</h1><div class="card"><h2 id="spanres">' + esc(msg) + '</h2><p>' + (end ? 'Two misses in a row. Round over. Best: ' + (st.best.span || 0) + ' digits.' : 'Next length: ' + S.len) + '</p><p class="doc">Tip: group digits in chunks of 3, like a phone number. Research: practice raises digit span, but mostly for digits (Ericsson, Chase and Faloon, 1980).</p></div>' + (end ? '' : b('span', 'Next')) + b('memory', 'Back', '', 'back'); };
+  // 2-back
+  T.nb = null;
+  T.nbStart = function (r) { var seq = E.nback(r, 2, 20, 0.3); T.nb = { seq: seq, i: -1, taps: [] }; app.innerHTML = '<h1>2-back</h1><p>Tap Match when the letter is the same as the one 2 letters back.</p><div class="card big" id="nbl">Ready</div>' + b('nbmatch', 'Match') + '<p id="nbpos"></p>' + b('memory', 'Quit', '', 'back');
+    (function step() { var N = T.nb, el = document.getElementById('nbl'); if (!el || !N) return; N.i++; if (N.i >= N.seq.length) return T.nbEnd(); el.textContent = N.seq[N.i]; document.getElementById('nbpos').textContent = (N.i + 1) + ' of ' + N.seq.length; timer = setTimeout(step, T.speed() * 2); })(); };
+  T.nbTap = function () { var N = T.nb; if (N && N.i >= 0 && N.taps.indexOf(N.i) < 0) { N.taps.push(N.i); var el = document.getElementById('nbl'); if (el) el.classList.add('tapped'); setTimeout(function () { if (el) el.classList.remove('tapped'); }, 200); } };
+  T.nbEnd = function () { var st = MG.UI.state(), N = T.nb, sc = E.nbackScore(N.seq, 2, N.taps); st.best.nback = Math.max(st.best.nback || 0, sc.pct); MG.UI.save();
+    app.innerHTML = '<h1>2-back</h1><div class="card"><h2 id="nbres">Score ' + sc.pct + '%</h2><p>Hits ' + sc.hits + ', missed ' + sc.misses + ', false taps ' + sc.falseAlarms + '.</p><p class="doc">Honest note: n-back practice makes you better at n-back and similar tasks. Reviews (Melby-Lervag and Hulme, 2013) found no convincing gains in general intelligence.</p></div>' + b('nback', 'Play again') + b('memory', 'Back', '', 'back'); };
+  // Memory palace
+  T.pal = null;
+  T.palStart = function (r) { T.pal = { pairs: E.palaceRound(r, MG.palace), i: 0, right: 0, r: r };
+    app.innerHTML = '<h1>Memory palace</h1><p>Walk through a home in your mind. Picture each item at its place in a silly, vivid way (eggs cracking on the front door). Study the list, then tap Ready.</p>' + T.pal.pairs.map(function (p, i) { return '<div class="card">' + (i + 1) + '. <b>' + esc(p.place) + '</b>: ' + esc(p.item) + '</div>'; }).join('') + b('palready', 'Ready') + b('memory', 'Back', '', 'back'); };
+  T.palAsk = function () { var P = T.pal, p = P.pairs[P.i], others = E.shuffle(P.pairs.filter(function (x) { return x !== p; }), P.r).slice(0, 2).map(function (x) { return x.item; }), ch = E.shuffle([p.item].concat(others), P.r);
+    app.innerHTML = '<h1>Memory palace</h1><p>Place ' + (P.i + 1) + ' of ' + P.pairs.length + '</p><div class="card big">' + esc(p.place) + '</div><p>What did you put here?</p>' + ch.map(function (c) { return b('palpick', esc(c), ' data-v="' + esc(c) + '"'); }).join('') + b('memory', 'Quit', '', 'back'); };
+  T.palPick = function (v) { var st = MG.UI.state(), P = T.pal; if (v === P.pairs[P.i].item) P.right++; P.i++; if (P.i < P.pairs.length) return T.palAsk();
+    st.best.palace = Math.max(st.best.palace || 0, P.right); MG.UI.save();
+    app.innerHTML = '<h1>Memory palace</h1><div class="card"><h2 id="palres">' + P.right + ' of ' + P.pairs.length + '</h2><p class="doc">Research: ordinary people trained in the method of loci for 40 days more than doubled their recall of word lists (Dresler and others, 2017).</p></div>' + b('palace', 'Play again') + b('memory', 'Back', '', 'back'); };
+})();
+</script>
 <script data-src="ui/ui.js">
 // UI: screens, debounced taps, save/resume. Reads decks from MG.decks and logic from MG.E.
 (function () {
-  var E = MG.E, D = MG.decks.herbs, app = document.getElementById('app'), st, lastTap = 0, q = null;
+  var E = MG.E, D = MG.decks.herbs, app = document.getElementById('app'), st, lastTap = 0, lastAct = '', q = null;
   function load() { try { st = E.migrate(localStorage.getItem(E.SAVE_KEY)); } catch (e) { st = E.newState(); } }
   function save() { try { localStorage.setItem(E.SAVE_KEY, JSON.stringify(st)); } catch (e) { } }
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -293,9 +375,19 @@ if (typeof module !== 'undefined') module.exports = MG;
   function card(deck, id) { return MG.decks[deck].cards.filter(function (c) { return c.id === id; })[0]; }
   function mk(id) { var r = E.rng(st.seed++), dk = (st.session && st.session.deck) || 'herbs', c = card(dk, id); return dk === 'herbs' ? E.question(c, D.cards, r) : E.mcq(c, r); }
   app.addEventListener('click', function (ev) {
-    var b = ev.target.closest('[data-act]'); if (!b) return; var now = Date.now(); if (now - lastTap < 350) return; lastTap = now;
-    var a = b.getAttribute('data-act'), d = b.dataset;
+    var b = ev.target.closest('[data-act]'); if (!b) return; var a = b.getAttribute('data-act'), d = b.dataset, now = Date.now(); if (now - lastTap < (a === 'digit' ? 120 : 350) && (a === lastAct || a === 'pick' || a === 'next')) return; lastTap = now; lastAct = a;
     if (a === 'formulas' || a === 'home' || a === 'about' || a === 'herbs' || a === 'lookup' || a === 'browse' || a === 'chinese' || a === 'body' || a === 'dropped') return show(a);
+    var Tr = MG.trainers; if (Tr && a !== 'digit' && a !== 'undo' && a !== 'nbmatch') Tr.stop();
+    if (a === 'memory' || ((a === 'sec' || a === 'deck') && d.id === 'memory')) { cur = 'memory'; app.innerHTML = Tr.menu(st); window.scrollTo(0, 0); return; }
+    if (a === 'span') { cur = 'span'; return Tr.spanStart(st, E.rng(st.seed++)); }
+    if (a === 'digit') { if (Tr.span.typed.length < 30) Tr.span.typed += d.d; document.getElementById('typed').textContent = Tr.span.typed; return; }
+    if (a === 'undo') { Tr.span.typed = Tr.span.typed.slice(0, -1); document.getElementById('typed').innerHTML = esc(Tr.span.typed) || '&nbsp;'; return; }
+    if (a === 'spandone') { Tr.spanCheck(st); save(); return; }
+    if (a === 'nback') { cur = 'nback'; return Tr.nbStart(E.rng(st.seed++)); }
+    if (a === 'nbmatch') return Tr.nbTap();
+    if (a === 'palace') { cur = 'palace'; return Tr.palStart(E.rng(st.seed++)); }
+    if (a === 'palready') return Tr.palAsk();
+    if (a === 'palpick') return Tr.palPick(d.v);
     if (a === 'sec' || a === 'deck') { if (MG.decks[d.id] && d.id !== 'herbs') { curDeck = d.id; return show('deck'); } return show(d.id); }
     if (a === 'cards') { curDeck = d.deck; return show('cards'); }
     if (a === 'soon') { b.querySelector('small').textContent = 'Coming soon. Being built and source checked now.'; return; }

@@ -10,3 +10,6 @@ button.right{background:#2e7d4f}button.wrong{background:#9b3b3b}button:disabled{
 .src a{color:#9fd3ff;word-break:break-all;display:inline-block;min-height:48px;line-height:48px}
 .row{display:flex;gap:10px}.row>*{flex:1}
 @media (orientation:landscape) and (max-height:500px){#app{max-width:none;padding:8px 24px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}h1{font-size:24px}}
+.big{font-size:40px;text-align:center;font-weight:700;min-height:90px;display:flex;align-items:center;justify-content:center;letter-spacing:4px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:0 10px}.pad button{text-align:center;font-size:24px}
+.tapped{outline:4px solid #f4c542}

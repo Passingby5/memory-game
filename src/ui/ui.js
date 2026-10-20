@@ -1,6 +1,6 @@
 // UI: screens, debounced taps, save/resume. Reads decks from MG.decks and logic from MG.E.
 (function () {
-  var E = MG.E, D = MG.decks.herbs, app = document.getElementById('app'), st, lastTap = 0, q = null;
+  var E = MG.E, D = MG.decks.herbs, app = document.getElementById('app'), st, lastTap = 0, lastAct = '', q = null;
   function load() { try { st = E.migrate(localStorage.getItem(E.SAVE_KEY)); } catch (e) { st = E.newState(); } }
   function save() { try { localStorage.setItem(E.SAVE_KEY, JSON.stringify(st)); } catch (e) { } }
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -28,9 +28,19 @@
   function card(deck, id) { return MG.decks[deck].cards.filter(function (c) { return c.id === id; })[0]; }
   function mk(id) { var r = E.rng(st.seed++), dk = (st.session && st.session.deck) || 'herbs', c = card(dk, id); return dk === 'herbs' ? E.question(c, D.cards, r) : E.mcq(c, r); }
   app.addEventListener('click', function (ev) {
-    var b = ev.target.closest('[data-act]'); if (!b) return; var now = Date.now(); if (now - lastTap < 350) return; lastTap = now;
-    var a = b.getAttribute('data-act'), d = b.dataset;
+    var b = ev.target.closest('[data-act]'); if (!b) return; var a = b.getAttribute('data-act'), d = b.dataset, now = Date.now(); if (now - lastTap < (a === 'digit' ? 120 : 350) && (a === lastAct || a === 'pick' || a === 'next')) return; lastTap = now; lastAct = a;
     if (a === 'formulas' || a === 'home' || a === 'about' || a === 'herbs' || a === 'lookup' || a === 'browse' || a === 'chinese' || a === 'body' || a === 'dropped') return show(a);
+    var Tr = MG.trainers; if (Tr && a !== 'digit' && a !== 'undo' && a !== 'nbmatch') Tr.stop();
+    if (a === 'memory' || ((a === 'sec' || a === 'deck') && d.id === 'memory')) { cur = 'memory'; app.innerHTML = Tr.menu(st); window.scrollTo(0, 0); return; }
+    if (a === 'span') { cur = 'span'; return Tr.spanStart(st, E.rng(st.seed++)); }
+    if (a === 'digit') { if (Tr.span.typed.length < 30) Tr.span.typed += d.d; document.getElementById('typed').textContent = Tr.span.typed; return; }
+    if (a === 'undo') { Tr.span.typed = Tr.span.typed.slice(0, -1); document.getElementById('typed').innerHTML = esc(Tr.span.typed) || '&nbsp;'; return; }
+    if (a === 'spandone') { Tr.spanCheck(st); save(); return; }
+    if (a === 'nback') { cur = 'nback'; return Tr.nbStart(E.rng(st.seed++)); }
+    if (a === 'nbmatch') return Tr.nbTap();
+    if (a === 'palace') { cur = 'palace'; return Tr.palStart(E.rng(st.seed++)); }
+    if (a === 'palready') return Tr.palAsk();
+    if (a === 'palpick') return Tr.palPick(d.v);
     if (a === 'sec' || a === 'deck') { if (MG.decks[d.id] && d.id !== 'herbs') { curDeck = d.id; return show('deck'); } return show(d.id); }
     if (a === 'cards') { curDeck = d.deck; return show('cards'); }
     if (a === 'soon') { b.querySelector('small').textContent = 'Coming soon. Being built and source checked now.'; return; }

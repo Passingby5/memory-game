@@ -10,7 +10,7 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
   const shotDir = process.env.SHOTS;
   for (const vp of [{ width: 390, height: 844, name: 'portrait' }, { width: 844, height: 390, name: 'landscape' }]) {
     const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-    const page = await ctx.newPage(), errors = [];
+    const page = await ctx.newPage(), errors = []; await page.addInitScript(() => { window.MG_TRAIN_MS = 60; });
     page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') errors.push(m.text()); }); page.on('pageerror', e => errors.push(e.message));
     const tap = async sel => { await page.click(sel); await page.waitForTimeout(400); };
     const layout = async where => { const r = await page.evaluate(() => ({ over: document.documentElement.scrollWidth > innerWidth + 1, small: [...document.querySelectorAll('button,a')].filter(e => e.offsetParent).map(e => { const b = e.getBoundingClientRect(); return [e.textContent.slice(0, 25), b.width, b.height]; }).filter(b => b[1] < 48 || b[2] < 48) })); assert(!r.over, vp.name + ' overflow at ' + where); assert.deepStrictEqual(r.small, [], vp.name + ' small targets at ' + where); };
@@ -48,6 +48,20 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
     ok(vp.name + ' history Vietnam set practice with sources');
     await tap('[data-act=deck][data-id=history]'); await tap('[data-act=cards]'); assert(/Tel Dan/.test(await page.textContent('#app'))); await layout('history cards'); await shot('history-3-cards.jpg'); await tap('[data-act=deck].back'); await tap('[data-act=home]');
     ok(vp.name + ' history browse cards');
+    // Memory trainers
+    await tap('[data-act=sec][data-id=memory]'); await layout('memory menu'); await shot('memory-1-menu.jpg');
+    await tap('[data-act=span]'); await page.waitForSelector('[data-act=spandone]', { timeout: 10000 }); await layout('digit pad');
+    const cur = await page.evaluate(() => MG.trainers.span.cur); for (const ch of cur) { await page.click('[data-act=digit][data-d="' + ch + '"]'); await page.waitForTimeout(150); }
+    await shot('memory-2-digit-span.jpg'); await tap('[data-act=spandone]'); assert(/Right/.test(await page.textContent('#spanres'))); assert.strictEqual(await page.evaluate(() => MG.UI.state().best.span), 3); ok(vp.name + ' digit span right answer, best saved');
+    await page.evaluate(() => { window.MG_TRAIN_MS = 350; }); await tap('[data-act=memory]'); await tap('[data-act=nback]');
+    const seq = await page.evaluate(() => MG.trainers.nb.seq); let seen = -1;
+    while (true) { const st2 = await page.evaluate(() => MG.trainers.nb && document.getElementById('nbl') ? MG.trainers.nb.i : 99); if (st2 >= seq.length || st2 === 99) break; if (st2 !== seen) { seen = st2; if (st2 >= 2 && seq[st2] === seq[st2 - 2]) await page.click('[data-act=nbmatch]'); } await page.waitForTimeout(25); }
+    await page.waitForSelector('#nbres', { timeout: 10000 }); assert(/Score 100%/.test(await page.textContent('#nbres')), await page.textContent('#nbres')); await layout('nback'); ok(vp.name + ' 2-back scored 100% when tapping every match');
+    await tap('[data-act=memory]'); await tap('[data-act=palace]'); await layout('palace study'); const pairs = await page.evaluate(() => MG.trainers.pal.pairs); await tap('[data-act=palready]'); await shot('memory-3-palace.jpg');
+    for (const p of pairs) await tap('[data-act=palpick][data-v="' + p.item + '"]');
+    assert(/8 of 8/.test(await page.textContent('#palres'))); ok(vp.name + ' memory palace 8 of 8');
+    await tap('[data-act=memory]'); await tap('[data-act=start][data-deck=memory]'); const mq = await page.evaluate(() => MG.UI.state().session.q.answer); await tap('[data-act=pick][data-i="' + mq + '"]'); assert(/Right/.test(await page.textContent('#fb h2'))); await layout('memory practice'); ok(vp.name + ' spaced recall research cards');
+    await tap('[data-act=next]'); await tap('[data-act=deck].back'); await tap('[data-act=home]');
     assert.deepStrictEqual(errors, [], vp.name + ' console errors'); ok(vp.name + ' no console errors or warnings');
     await ctx.close();
   }
