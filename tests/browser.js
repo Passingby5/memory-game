@@ -52,7 +52,7 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
     for (const dk of ['survival', 'truth', 'vocab']) { if (!(await page.evaluate(k => !!MG.decks[k], dk))) continue;
       if (await page.locator('[data-act=home]').count()) await tap('[data-act=home]'); await tap('[data-act=sec][data-id=' + dk + ']'); await layout(dk + ' menu'); await shot(dk + '-1-menu.jpg');
       await tap('[data-act=start][data-deck=' + dk + ']'); const a2 = await page.evaluate(() => MG.UI.state().session.q.answer); await tap('[data-act=pick][data-i="' + a2 + '"]');
-      assert(/Right/.test(await page.textContent('#fb h2'))); assert(/(wikipedia|wiktionary)/.test(await page.textContent('#fb'))); await layout(dk + ' feedback'); await shot(dk + '-2-answer.jpg');
+      assert(/Right/.test(await page.textContent('#fb h2'))); if (dk === 'vocab') { const fl = await page.textContent('#filled'), want = await page.evaluate(() => { const s = MG.UI.state().session; return MG.decks.vocab.cards.find(c => c.id === s.q.id); }); assert(fl.includes(want.a) && !fl.includes('____')); assert((await page.textContent('#fb')).includes(want.vi)); } assert(/(wikipedia|wiktionary)/.test(await page.textContent('#fb'))); await layout(dk + ' feedback'); await shot(dk + '-2-answer.jpg');
       await tap('[data-act=deck].back'); await tap('[data-act=cards]'); await layout(dk + ' cards'); await tap('[data-act=deck].back'); await tap('[data-act=home]'); ok(vp.name + ' ' + dk + ' deck practice, sources, browse'); }
     // Memory trainers
     await tap('[data-act=sec][data-id=memory]'); await layout('memory menu'); await shot('memory-1-menu.jpg');

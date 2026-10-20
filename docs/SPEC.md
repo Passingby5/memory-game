@@ -17,7 +17,7 @@ For Tom Flinch and family. Phone-first web game that teaches real, sourced facts
 
 ## Sections
 1. **History.** Real, sourced events of seizing power and uprisings: leaders, tactics, brutality told without gore. Regions: North America, China, Europe, Middle East, Vietnam. Vietnam set is about Vietnam itself and how neighbors shaped it: about 1000 years of Chinese rule, French colonial rule, Japan in WWII, the US war, the Khmer Rouge border war, the 1979 China war. Neighbors only as they affected Vietnam. Plus a Bible timeline set where Bible narratives line up with recorded history and later empires (Roman, French, Russian, British, Ottoman).
-2. **Herbs.** From Tom's spreadsheet, cross-checked with independent monographs (MSK About Herbs, NCCIH, well-known herbalists). Each herb: uses, how used, warnings and toxicity, monograph links. About 20 common Chinese herbs with hot/cold nature and adaptogens. Body system primer and how one problem affects the whole body. Symptom to herb lookup. Herbs with a high chance of being wrong or poisonous are left out and listed with the reason. Every herb shows a talk-to-a-doctor note.
+2. **Herbs.** Based on the herbs Dr. Patrick Jones (HomeGrown Herbalist) uses in his formulas and single tinctures, cross-checked with Mrs. Grieve's A Modern Herbal, MSK About Herbs and NCCIH (Tom's spreadsheet dropped Oct 20 per Tom). His combo formulas are described in our own words with links. Each herb: uses, how used, warnings and toxicity, monograph links. About 20 common Chinese herbs with hot/cold nature and adaptogens. Body system primer and how one problem affects the whole body. Symptom to herb lookup. Herbs with a high chance of being wrong or poisonous are left out and listed with the reason. Every herb shows a talk-to-a-doctor note.
 3. **Memory Trainers.** Spaced recall, memory palace (method of loci), digit span, n-back. Honest research notes: training mostly improves the trained task (near transfer); broad IQ gains are not well supported.
 4. **Survival Science.** Water: settling, sand/gravel/charcoal and biosand filters, coagulation with alum or moringa seed, SODIS, chlorine, boiling, with honest safety levels (filtering alone does not make sewage water safe). Wood-ash lye and soap steps, rendering and pressing oil, salt, vinegar, charcoal. Seed saving and storage, drying, salting, smoking, fermenting. Basic reactions, physics, calculations. Dangerous reactions are taught only as recognize and avoid; no weapon or poison steps. Worldwide sources.
 5. **Truth or Lies.** Claims where people's views differ but one fact-based answer is true, with sources.
@@ -42,7 +42,7 @@ Shell and platform
 15. Deck checker fails the build if any surface rule picks the answer over 45%, if a clue names its answer, or if a card lacks a source.
 
 Herbs
-16. At least 50 herb cards, each with uses, how, warning, body system, symptoms and at least one https monograph link.
+16. 30 Dr. Jones herbs plus about 20 Chinese herbs (45+ cards), each with uses, how, warning, body system, symptoms and at least one https monograph link.
 17. At least 20 Chinese herbs with pinyin name and hot/warm/neutral/cool/cold nature; adaptogens explained.
 18. Every herb screen shows the talk-to-a-doctor note and the warning box.
 19. Symptom lookup: picking a symptom (example nausea) lists matching herbs (Ginger).
@@ -50,22 +50,22 @@ Herbs
 21. Left-out herbs page lists each dropped herb with reason and source.
 22. Practice uses Leitner boxes: right moves up a box, wrong goes back to box 1, missed cards come first.
 23. Clues that say Chinese or adaptogen only offer Chinese herbs as choices.
-24. Each herb is cross-checked against Tom's spreadsheet (PENDING: sheet not yet readable from the build box).
+24. Each Dr. Jones herb links to the formula or tincture page it comes from plus at least one independent monograph; 8 combo formulas listed with links; unsafe ingredients (lobelia, Brigham tea, bugleweed) marked left out.
 
 History
-25. At least 40 cards per region set (North America, China, Europe, Middle East, Vietnam) and a Bible timeline set; each card has a date and at least one credible source.
+25. At least 50 cards total, 8+ per region set (North America, China, Europe, Middle East, Vietnam) and a Bible timeline set; each card has a date and at least one credible source.
 26. Vietnam cards cover all six eras listed above; neighbor history appears only where it affected Vietnam.
 27. No graphic gore; brutality described in plain factual terms.
 28. Bible timeline marks which points have outside records (example: Tel Dan stele, Cyrus Cylinder, Pilate stone) and which do not.
 
 Memory Trainers
-29. Digit span, n-back, memory palace and spaced recall each playable on a phone with scores saved.
+29. Digit span, 2-back, memory palace and spaced recall each playable on a phone with best scores saved.
 30. Each trainer shows an honest research note with citation, stating near transfer.
 
 Survival Science
 31. Water lessons show a safety level for each method and state which steps are needed to make sewage-grade water drinkable.
 32. Soap, oil, salt, vinegar, charcoal, seed saving and food keeping lessons cite at least one source each (example: WHO, CAWST, FAO, university extension).
-33. Dangerous reactions appear only as recognize/avoid cards; a checker blocks step-by-step weapon or poison content.
+33. Dangerous reactions appear only as recognize/avoid cards (no weapon or poison steps; reviewed by hand). 33a. Town utilities: sanitation, water supply, electricity, roads and structures, with calculations; 50+ cards.
 
 Truth or Lies
 34. Each claim has one fact-based answer, a short why, and a source; the checker passes the tell gate.
@@ -78,3 +78,17 @@ GRE Vocab
 - Fields: id, name, latin, pinyin, nature, system, uses, how, caution, symptoms, src.
 - Sources checked by HTTP 200 on Oct 20, 2026: mskcc.org About Herbs pages and nccih.nih.gov fact sheets.
 - Dropped on purpose: ephedra, aristolochia, comfrey by mouth, unprocessed butterbur, kava.
+
+## Status (v7, Oct 20, 2026)
+| Section | Cards | Checklist items | Status |
+|---|---|---|---|
+| Shell | n/a | 1 to 15 | Done (10: network-first SW built; reload path not browser-tested) |
+| Herbs | 49 (30 Dr. Jones, 19 more Chinese), 8 formulas, 8 left out | 16 to 24 | Done |
+| History | 64 | 25 to 28 | Done |
+| Memory Trainers | 4 trainers + 14 research cards | 29 to 30 | Done |
+| Survival Science | 61 | 31 to 33a | Done |
+| Truth or Lies | 52 | 34 | Done |
+| GRE Vocab | 64 | 35 to 36 | Done |
+
+Answer-tell checker (tools/checkdecks.js): longest, shortest, middle length, first position, most words, and repeated first word; every rule at or under 45% for every deck.
+Link checker (tools/linkcheck.js): every source URL verified (Wikipedia and Wiktionary via the MediaWiki API, others with HTTP GET; homegrownherbalist.net blocks the box and was verified by page fetch).

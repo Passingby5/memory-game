@@ -1,0 +1,82 @@
+// GRE vocabulary deck data only: [word, part of speech, synonym group, English meaning, Vietnamese meaning, sentence with ____].
+// Sources per word: English Wiktionary (definition) and Vietnamese Wiktionary (Vietnamese meaning). Wrong choices are other words
+// of the same part of speech from a different meaning group, so they never fit the sentence.
+var MG = typeof MG !== 'undefined' ? MG : {}; MG.decks = MG.decks || {};
+(function () {
+var V = [
+['abate','verb','lessen','to become less strong','giảm bớt, dịu đi','We waited inside until the storm began to ____.'],
+['aberrant','adj','odd','different from what is normal','khác thường, lệch lạc','The scientist threw out one ____ result that did not match the others.'],
+['abstain','verb','refrain','to choose not to do something','kiêng, tránh, không tham gia','During the fast, the family chose to ____ from meat.'],
+['alacrity','noun','eager','cheerful eagerness and speed','sự sốt sắng, sự nhanh nhẹn','When Dad offered pancakes, the kids ran to the table with ____.'],
+['ameliorate','verb','improve','to make a bad situation better','cải thiện, làm cho tốt hơn','The new well helped ____ the village\'s water problem.'],
+['anomaly','noun','odd','something that is not normal','sự bất thường, điều dị thường','Snow in Santee in July would be a real ____.'],
+['apathy','noun','indifferent','a lack of interest or caring','sự thờ ơ, sự lãnh đạm','Only ten people voted, which showed the town\'s ____.'],
+['arduous','adj','hard','very hard and tiring','gian khổ, khó khăn','The climb up the steep mountain trail was long and ____.'],
+['assuage','verb','soothe','to make a feeling less painful','làm dịu, xoa dịu','A warm hug helped ____ the little boy\'s fear of the dark.'],
+['audacious','adj','bold','very bold and daring','táo bạo, cả gan','Crossing the ocean in a tiny boat was an ____ plan.'],
+['banal','adj','dull','boring because it is so common','tầm thường, sáo rỗng','The movie had a ____ plot we had all seen before.'],
+['benevolent','adj','kind','kind and wanting to help others','nhân từ, rộng lượng','The ____ old man gave free food to every hungry family.'],
+['candid','adj','honest','honest and direct','thẳng thắn, bộc trực','She gave a ____ answer, even though the truth was hard.'],
+['capricious','adj','changeable','changing suddenly without reason','thất thường, đồng bóng','The ____ spring weather went from sun to hail in an hour.'],
+['castigate','verb','scold','to scold or criticize harshly','trừng phạt, khiển trách nghiêm khắc','The coach did not ____ the team after the loss; he encouraged them.'],
+['cogent','adj','convincing','clear and convincing','có sức thuyết phục, chặt chẽ','She made a ____ argument, and the whole class agreed.'],
+['complacent','adj','smug','too satisfied, so not careful','tự mãn','After winning ten games, the team grew ____ and stopped practicing.'],
+['conciliatory','adj','peacemaking','meant to end anger or make peace','có tính hòa giải','He sent a ____ letter to end the long family quarrel.'],
+['corroborate','verb','confirm','to support with more proof','xác nhận, chứng thực','Two other people saw the accident and could ____ her story.'],
+['credulous','adj','naive','too ready to believe things','cả tin, dễ tin','Only a ____ person would believe that email from a "prince."'],
+['deference','noun','respect','polite respect for someone','sự tôn trọng, sự kính trọng','The children stood up in ____ when Grandpa entered the room.'],
+['diatribe','noun','attack','a long, angry speech against something','bài đả kích, lời chỉ trích gay gắt','The angry neighbor gave a long ____ about barking dogs.'],
+['diligent','adj','careful','working hard and carefully','siêng năng, cần cù','A ____ student checks every answer before turning in the test.'],
+['disparage','verb','belittle','to speak of something as unimportant or bad','chê bai, coi thường','It is unkind to ____ someone else\'s hard work.'],
+['dogmatic','adj','rigid','stating opinions as if they cannot be wrong','giáo điều, độc đoán','He was so ____ that he would not even listen to the evidence.'],
+['eclectic','adj','varied','made from many different sources','chiết trung, đa dạng','Her ____ music collection had hymns, jazz and folk songs.'],
+['elucidate','verb','explain','to make clear by explaining','làm sáng tỏ, giải thích','The teacher drew a picture to ____ how the heart pumps blood.'],
+['enervate','verb','weaken','to drain energy from','làm suy yếu, làm kiệt sức','The long, hot afternoon seemed to ____ everyone on the farm.'],
+['ephemeral','adj','brief','lasting a very short time','phù du, ngắn ngủi','The rainbow was ____, gone in less than a minute.'],
+['equivocal','adj','unclear','unclear and open to more than one meaning','mơ hồ, nước đôi','His ____ answer left us unsure if he would come or not.'],
+['erudite','adj','learned','having a lot of knowledge from study','uyên bác, thông thái','The ____ professor could read Greek, Latin and Hebrew.'],
+['exacerbate','verb','worsen','to make a problem worse','làm trầm trọng thêm','Scratching will only ____ a mosquito bite.'],
+['fervent','adj','eager','showing very strong feeling','nhiệt thành, tha thiết','She said a ____ prayer for her sick friend.'],
+['frugal','adj','thrifty','careful not to waste money','tiết kiệm, đạm bạc','Our ____ grandmother saved every jar and piece of string.'],
+['gregarious','adj','social','liking to be with other people','thích giao du, hòa đồng','Our ____ dog runs to greet every visitor.'],
+['hackneyed','adj','dull','used so often it is no longer fresh','sáo rỗng, nhàm','"Busy as a bee" is a ____ phrase.'],
+['impetuous','adj','rash','acting quickly without thinking','bốc đồng, hấp tấp','In an ____ moment, he jumped into the cold lake with his shoes on.'],
+['incisive','adj','sharp','clear, sharp and direct','sắc sảo, sắc bén','Her ____ question showed the plan\'s biggest weakness.'],
+['indolent','adj','lazy','lazy and avoiding work','lười biếng, biếng nhác','The ____ cat slept in the sun all day.'],
+['innocuous','adj','harmless','not harmful','vô hại','The snake looked scary but was completely ____.'],
+['intransigent','adj','stubborn','refusing to change one\'s views','không khoan nhượng, cứng rắn','Both sides were ____, so the talks failed.'],
+['laconic','adj','quiet','using very few words','ngắn gọn, kiệm lời','The ____ rancher answered every question with "Yep" or "Nope."'],
+['lucid','adj','clear','easy to understand','rõ ràng, minh bạch','The pastor gave a ____ explanation of a hard Bible passage.'],
+['magnanimous','adj','kind','generous and forgiving','cao thượng, hào hiệp','The ____ winner shook hands and praised the losing team.'],
+['meticulous','adj','careful','paying close attention to every detail','tỉ mỉ, kỹ lưỡng','The ____ carpenter measured each board three times.'],
+['mitigate','verb','lessen','to make less severe','giảm nhẹ, làm dịu','Planting trees can ____ the damage from floods.'],
+['obdurate','adj','stubborn','stubbornly refusing to change','cứng đầu, ngoan cố','The ____ mule would not move, no matter how we pulled.'],
+['obsequious','adj','flattering','too eager to please or obey','khúm núm, xu nịnh','The ____ waiter bowed and praised every choice we made.'],
+['ostentatious','adj','showy','showy, meant to impress','phô trương, khoe khoang','His ____ gold car stood out on the quiet street.'],
+['paucity','noun','lack','too little of something','sự khan hiếm, sự ít ỏi','The ____ of rain left the crops dry and brown.'],
+['pedantic','adj','fussy','too focused on small rules and details','thông thái rởm, câu nệ tiểu tiết','He was so ____ that he corrected his friend\'s grammar at dinner.'],
+['placate','verb','soothe','to calm someone who is upset','xoa dịu, làm nguôi','Mom gave the crying baby a bottle to ____ her.'],
+['pragmatic','adj','practical','dealing with things in a practical way','thực dụng, thực tế','Instead of complaining, she took a ____ approach and fixed it.'],
+['prodigal','adj','wasteful','spending money wastefully','hoang phí, phá của','In the parable, the ____ son wasted his whole inheritance.'],
+['prosaic','adj','dull','ordinary and not exciting','tầm thường, nhạt nhẽo','He expected adventure, but the job was ____ paperwork.'],
+['quiescent','adj','still','quiet and not active for now','im lìm, yên tĩnh','The volcano has been ____ for hundreds of years.'],
+['recalcitrant','adj','stubborn','refusing to obey rules','cứng đầu, bất trị','The ____ horse would not let anyone ride it.'],
+['reticent','adj','quiet','not willing to talk about oneself','kín đáo, dè dặt','He was ____ about his time in the war and rarely spoke of it.'],
+['sanguine','adj','hopeful','hopeful and cheerful','lạc quan, đầy hy vọng','Despite the rain, the farmer was ____ about the harvest.'],
+['soporific','adj','sleepy','causing sleep','gây buồn ngủ','The long, slow sermon on a hot day was ____.'],
+['tenacious','adj','persistent','holding on and not giving up','kiên trì, bền bỉ','The ____ puppy would not let go of the rope.'],
+['venerate','verb','respect','to treat with deep respect','tôn kính, sùng kính','Many cultures ____ their elders.'],
+['verbose','adj','wordy','using more words than needed','dài dòng, rườm rà','The ____ instructions took ten pages to explain one simple step.'],
+['zealous','adj','eager','full of energy for a cause','hăng hái, nhiệt tình','The ____ volunteers worked all night to fill sandbags.']
+];
+var E = function (w) { return 'https://en.wiktionary.org/wiki/' + w; }, VI = function (w) { return 'https://vi.wiktionary.org/wiki/' + w; };
+// Pick two wrong words: same part of speech, different meaning group, chosen by fixed offsets so the deck is the same every build.
+function wrongs(i) { var me = V[i], out = [], k = 7; while (out.length < 2 && k < V.length * 3) { var x = V[(i + k) % V.length]; if (x[1] === me[1] && x[2] !== me[2] && out.indexOf(x[0]) < 0 && x[0] !== me[0]) out.push(x[0]); k += (V.length % 11 ? 11 : 13); if (k > V.length * 2) k = k % V.length + 1; } return out; }
+MG.decks.vocab = { id: 'vocab', title: 'GRE Vocab', note: 'Pick the word that fits. After you choose, see the sentence filled in, the meaning, and the Vietnamese.',
+  sets: ['Verbs', 'Adjectives', 'Nouns'],
+  cards: V.map(function (v, i) { return { id: 'v' + (i + 1), set: { verb: 'Verbs', adj: 'Adjectives', noun: 'Nouns' }[v[1]], q: v[5], a: v[0], w: wrongs(i), pos: v[1], def: v[3], vi: v[4],
+    why: v[0] + ' (' + v[1] + '): ' + v[3] + '. Tiếng Việt: ' + v[4] + '.', src: [E(v[0]), VI(v[0])] }; }) };
+MG.fb = MG.fb || {};
+MG.fb.vocab = function (c, esc) { return '<div class="card"><p id="filled">' + esc(c.q).replace('____', '<b><u>' + esc(c.a) + '</u></b>') + '</p><p><b>' + esc(c.a) + '</b> (' + esc(c.pos) + '): ' + esc(c.def) + '</p><p lang="vi"><b>Tiếng Việt:</b> ' + esc(c.vi) + '</p></div>'; };
+})();
+if (typeof module !== 'undefined') module.exports = MG;
