@@ -5,7 +5,9 @@
 const L = require('../tests/load.js');
 function check(verbose) {
   const MG = L.load(), D = MG.decks.herbs, E = MG.E, errs = [], ids = {};
-  if (D.cards.length < 50) errs.push('herbs: need at least 50 cards, have ' + D.cards.length);
+  if (D.cards.filter(c => c.set === 'jones').length < 30) errs.push('herbs: need 30 Dr. Jones herbs');
+  if (D.cards.length < 45) errs.push('herbs: need at least 45 cards, have ' + D.cards.length);
+  D.formulas.forEach(f => { if (!/^https:/.test(f.url) || f.herbs.length < 2) errs.push('formula ' + f.name + ' needs herbs and link'); });
   D.cards.forEach(c => {
     if (ids[c.id]) errs.push('duplicate id ' + c.id); ids[c.id] = 1;
     ['name', 'latin', 'system', 'uses', 'how', 'caution'].forEach(k => { if (!c[k]) errs.push(c.id + ': missing ' + k); });

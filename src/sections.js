@@ -1,7 +1,7 @@
 // Home screen section list (data only).
 var MG = typeof MG !== 'undefined' ? MG : {};
 MG.SECTIONS = [
-  { id: 'herbs', title: 'Herbs', blurb: '50 herbs: uses, warnings, Chinese hot and cold, symptom lookup', ready: true },
+  { id: 'herbs', title: 'Herbs', blurb: 'Dr. Patrick Jones herbs and formulas, Chinese hot and cold, symptom lookup', ready: true },
   { id: 'history', title: 'History', blurb: 'Uprisings, leaders and empires; Vietnam; Bible timeline', ready: false },
   { id: 'memory', title: 'Memory Trainers', blurb: 'Spaced recall, memory palace, digit span, n-back', ready: false },
   { id: 'survival', title: 'Survival Science', blurb: 'Clean water, soap, food keeping, basic chemistry', ready: false },
