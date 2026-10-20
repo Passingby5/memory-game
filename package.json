@@ -1,2 +1,3 @@
 { "name": "memory-game", "version": "1.0.0", "private": true,
-  "scripts": { "build": "node build.js", "test": "node tools/checkdecks.js && node tests/unit.js && node build.js && node tests/browser.js && node tests/single.js" } }
+  "scripts": { "build": "node build.js", "testcopy": "MG_TESTCOPY=/workspace/memory-game-test.html node tests/single.js",
+    "test": "node tools/checkdecks.js && node tests/unit.js && node build.js && node tests/browser.js && node tests/single.js" } }

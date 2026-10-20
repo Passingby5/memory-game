@@ -54,9 +54,25 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
       await tap('[data-act=start][data-deck=' + dk + ']'); const a2 = await page.evaluate(() => MG.UI.state().session.q.answer); await tap('[data-act=pick][data-i="' + a2 + '"]');
       assert(/Right/.test(await page.textContent('#fb h2'))); if (dk === 'vocab') { const fl = await page.textContent('#filled'), want = await page.evaluate(() => { const s = MG.UI.state().session; return MG.decks.vocab.cards.find(c => c.id === s.q.id); }); assert(fl.includes(want.a) && !fl.includes('____')); assert((await page.textContent('#fb')).includes(want.vi)); } assert(/(wikipedia|wiktionary)/.test(await page.textContent('#fb'))); await layout(dk + ' feedback'); await shot(dk + '-2-answer.jpg');
       await tap('[data-act=deck].back'); await tap('[data-act=cards]'); await layout(dk + ' cards'); await tap('[data-act=deck].back'); await tap('[data-act=home]'); ok(vp.name + ' ' + dk + ' deck practice, sources, browse'); }
+    // B-1 herb card St John's wort doctor line; Circulatory Support med warning
+    await tap('[data-act=sec][data-id=herbs]'); await tap('[data-act=browse]'); await tap('[data-act=herb][data-id=stjohnswort]');
+    let tx = await page.textContent('#app'); assert(/see a doctor/.test(tx) && /interact/i.test(tx) && !/Pregnancy, nursing/.test(tx)); await shot('fix-1-stjohnswort.jpg');
+    await page.goBack(); await page.waitForTimeout(400); assert(await page.locator('[data-act=herb][data-id=ginger]').count() === 1, 'back gesture returns to herb list'); ok(vp.name + ' B-1 St Johns wort doctor line; M-2 back gesture goes back one screen');
+    await page.goBack(); await page.waitForTimeout(400); assert(await page.locator('[data-act=browse]').count() === 1); await tap('[data-act=formulas]'); assert(/Do not stop or change prescribed blood pressure/.test(await page.textContent('#app'))); ok(vp.name + ' formula med warning');
+    await tap('[data-act=herbs].back'); await tap('[data-act=home]');
+    // M-4 and M-5 badges
+    await tap('[data-act=sec][data-id=history]'); await tap('[data-act=cards][data-deck=history]'); tx = await page.textContent('#app'); assert(/No outside record found yet/.test(tx) && /Traditional date/.test(tx));
+    await page.evaluate(() => [...document.querySelectorAll('h2')].find(h => h.textContent === 'Bible Timeline').scrollIntoView()); await shot('fix-2-bible-records.jpg'); await page.goBack(); await page.waitForTimeout(300); await page.goBack(); await page.waitForTimeout(300);
+    assert(await page.locator('#ver').count() === 1, 'two backs reach home');
+    await tap('[data-act=sec][data-id=survival]'); await tap('[data-act=start][data-set="Water"]'); const wa = await page.evaluate(() => MG.UI.state().session.q.answer); await tap('[data-act=pick][data-i="' + wa + '"]');
+    assert(/Safety level:/.test(await page.textContent('#fb'))); if (vp.name === 'landscape') { const top = await page.evaluate(() => document.getElementById('fb').getBoundingClientRect().top); assert(top < 100, 'landscape scrolls to feedback ' + top); }
+    await shot('fix-3-water-level.jpg'); await tap('[data-act=deck].back'); await tap('[data-act=home]'); ok(vp.name + ' M-4 Bible records, M-5 water levels, p-1 landscape scroll');
+    // M-7 vocab meaning once
+    await tap('[data-act=sec][data-id=vocab]'); await tap('[data-act=start][data-deck=vocab]'); const va = await page.evaluate(() => MG.UI.state().session.q.answer); await tap('[data-act=pick][data-i="' + va + '"]');
+    tx = await page.textContent('#fb'); assert.strictEqual(tx.split('Tiếng Việt').length, 2, 'Vietnamese shown once'); await shot('fix-4-vocab-once.jpg'); await tap('[data-act=deck].back'); await tap('[data-act=home]'); ok(vp.name + ' M-7 vocab meaning once');
     // Memory trainers
     await tap('[data-act=sec][data-id=memory]'); await layout('memory menu'); await shot('memory-1-menu.jpg');
-    await tap('[data-act=span]'); await page.waitForSelector('[data-act=spandone]', { timeout: 10000 }); await layout('digit pad');
+    await tap('[data-act=span]'); assert(await page.locator('#flash').count() === 1 && await page.locator('[data-act=memory]').count() === 1, 'm-9 Quit on flash'); await page.waitForSelector('[data-act=spandone]', { timeout: 10000 }); await layout('digit pad');
     const cur = await page.evaluate(() => MG.trainers.span.cur); for (const ch of cur) { await page.click('[data-act=digit][data-d="' + ch + '"]'); await page.waitForTimeout(150); }
     await shot('memory-2-digit-span.jpg'); await tap('[data-act=spandone]'); assert(/Right/.test(await page.textContent('#spanres'))); assert.strictEqual(await page.evaluate(() => MG.UI.state().best.span), 3); ok(vp.name + ' digit span right answer, best saved');
     await page.evaluate(() => { window.MG_TRAIN_MS = 350; }); await tap('[data-act=memory]'); await tap('[data-act=nback]');
@@ -68,6 +84,11 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
     assert(/8 of 8/.test(await page.textContent('#palres'))); ok(vp.name + ' memory palace 8 of 8');
     await tap('[data-act=memory]'); await tap('[data-act=start][data-deck=memory]'); const mq = await page.evaluate(() => MG.UI.state().session.q.answer); await tap('[data-act=pick][data-i="' + mq + '"]'); assert(/Right/.test(await page.textContent('#fb h2'))); await layout('memory practice'); ok(vp.name + ' spaced recall research cards');
     await tap('[data-act=next]'); await tap('[data-act=deck].back'); await tap('[data-act=home]');
+    // M-1 broken saves never white-screen
+    for (const bad of ['{"v":2,"session":{"deck":"nope","ids":["x"],"i":0}}', '{"v":2}', '{"v":2,"stats":null,"boxes":[],"best":7}', '{"v":2,"session":{"deck":"herbs","ids":["gone"],"i":0,"q":{"id":"gone","choices":["a","b","c"],"answer":0,"prompt":"p"}}}', '[1,2]', '{bad']) {
+      await page.evaluate(b => localStorage.setItem('mg_save', b), bad); await page.reload({ waitUntil: 'load' }); assert(await page.locator('#ver').count() === 1, 'home after bad save ' + bad);
+      await tap('[data-act=sec][data-id=herbs]'); await tap('[data-act=start]'); assert.strictEqual(await page.locator('[data-act=pick]').count(), 3, 'quiz works after ' + bad); await tap('[data-act=deck].back'); await tap('[data-act=home]'); }
+    await page.evaluate(() => localStorage.removeItem('mg_save')); ok(vp.name + ' M-1 six broken saves load home and play');
     assert.deepStrictEqual(errors, [], vp.name + ' console errors'); ok(vp.name + ' no console errors or warnings');
     await ctx.close();
   }
