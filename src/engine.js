@@ -33,7 +33,7 @@ var MG = typeof MG !== 'undefined' ? MG : {};
     return { kind: k, id: card.id, prompt: E.mask(prompt, card), choices: choices, answer: choices.indexOf(card.name) };
   };
   // Remove the herb's own name from the clue so the prompt never gives away the answer.
-  E.mask = function (t, card) { var names = [card.name].concat(card.name.split(/[ ()]+/).filter(function (w) { return w.length > 4; })); names.forEach(function (n) { t = t.split(n).join('this herb').split(n.toLowerCase()).join('this herb'); }); return t; };
+  E.mask = function (t, card) { var n = card.name.replace(/\s*\(.*\)/, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); return t.replace(new RegExp('\\b' + n + '\\b', 'gi'), 'this herb'); };
   // Generic multiple choice card {q, a, w:[2]}: choices are the answer plus two wrong answers, shuffled by the seeded RNG.
   E.mcq = function (card, r) { var ch = E.shuffle([card.a].concat(card.w), r); return { kind: 'mcq', id: card.id, prompt: card.q, choices: ch, answer: ch.indexOf(card.a) }; };
   // Trainers. Digit span: random digits; length goes up after a right answer, down after a wrong one (minimum 3).

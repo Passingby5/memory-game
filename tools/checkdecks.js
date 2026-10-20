@@ -10,7 +10,7 @@ function check(verbose) {
   D.formulas.forEach(f => { if (!/^https:/.test(f.url) || f.herbs.length < 2) errs.push('formula ' + f.name + ' needs herbs and link'); });
   D.cards.forEach(c => {
     if (ids[c.id]) errs.push('duplicate id ' + c.id); ids[c.id] = 1;
-    ['name', 'latin', 'system', 'uses', 'how', 'caution'].forEach(k => { if (!c[k]) errs.push(c.id + ': missing ' + k); });
+    ['name', 'latin', 'system', 'uses', 'how', 'caution', 'preg'].forEach(k => { if (!c[k]) errs.push(c.id + ': missing ' + k); });
     if (!c.src.length || c.src.some(u => !/^https:\/\//.test(u))) errs.push(c.id + ': needs https monograph source');
     if (!c.symptoms.length) errs.push(c.id + ': needs symptoms');
     if (!MG.bodySystems.some(b => b[0] === c.system)) errs.push(c.id + ': unknown body system ' + c.system);
