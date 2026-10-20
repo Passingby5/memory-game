@@ -20,4 +20,5 @@ t('n-back: sequence has targets, scoring counts hits and false taps', () => { co
 t('memory palace round: 8 places, 8 different items', () => { const r = E.palaceRound(E.rng(1), MG.palace); assert.strictEqual(r.length, 8); assert.strictEqual(new Set(r.map(x => x.item)).size, 8); });
 t('memory research cards: 4 sets with sources', () => { const M = MG.decks.memory; M.sets.forEach(x => assert(M.cards.some(c => c.set === x))); M.cards.forEach(c => assert(c.src.length)); });
 t('survival: 50+ cards, 8 sets incl. town utilities and safety', () => { const S = MG.decks.survival; assert(S.cards.length >= 50); S.sets.forEach(x => assert(S.cards.some(c => c.set === x), x)); assert(S.cards.filter(c => /\d/.test(c.why) && /[x=\/]/.test(c.why)).length >= 6, 'calculations'); });
+t('truth or lies: 50+ cards with one true answer and sources', () => { const T = MG.decks.truth; assert(T.cards.length >= 50); T.cards.forEach(c => { assert(c.src.length && c.why); assert(c.w.indexOf(c.a) < 0); }); });
 console.log('unit: ' + n + ' passed');
