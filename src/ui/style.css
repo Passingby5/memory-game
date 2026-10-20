@@ -1,0 +1,12 @@
+*{box-sizing:border-box}html,body{margin:0;background:#12263a;color:#f4f1e8;font:18px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+#app{max-width:760px;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 14px 40px}
+h1{font-size:28px;margin:6px 0 2px}h2{font-size:22px;margin:10px 0}p{margin:8px 0}
+button,a.btn{display:block;width:100%;min-height:56px;margin:10px 0;padding:12px 16px;border:0;border-radius:14px;background:#2c5d82;color:#fff;font:inherit;font-weight:600;text-align:left;cursor:pointer;text-decoration:none}
+button small{display:block;font-weight:400;opacity:.85;font-size:15px}
+button.soon{background:#2a3a48;color:#b9c2ca}button.back{background:#3d4a56;text-align:center}
+button.right{background:#2e7d4f}button.wrong{background:#9b3b3b}button:disabled{opacity:1}
+.ver{font-size:14px;opacity:.75;margin:0 0 8px}.card{background:#1c3550;border-radius:14px;padding:12px 14px;margin:10px 0}
+.warn{background:#5a3b14;border-radius:12px;padding:10px 12px;margin:8px 0}.doc{font-size:15px;opacity:.9}
+.src a{color:#9fd3ff;word-break:break-all;display:inline-block;min-height:48px;line-height:48px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+@media (orientation:landscape) and (max-height:500px){#app{max-width:none;padding:8px 24px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}h1{font-size:24px}}

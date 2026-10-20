@@ -1,0 +1,70 @@
+// Build: runs the deck checker, then concatenates src/ into site/index.html (PWA) with sw.js, version.json, manifest.
+// MG_SINGLE=<file> also writes a single-file test copy (no service worker, icons inlined not needed).
+const fs = require('fs'), path = require('path'), crypto = require('crypto'), { execSync } = require('child_process');
+const { ORDER } = require('./tests/load.js');
+const errs = require('./tools/checkdecks.js').check(); if (errs.length) { console.error('Deck check failed:\n' + errs.join('\n')); process.exit(1); }
+const r = f => fs.readFileSync(path.join(__dirname, 'src', f), 'utf8');
+const VERSION = 1, DATE = 'Oct 20';
+let commit = process.env.COMMIT || ''; if (!commit) { try { commit = execSync('git rev-parse HEAD', { cwd: __dirname, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch (e) { commit = 'local'; } }
+const LABEL = 'v' + VERSION + ' - ' + DATE + ' - ' + commit.slice(0, 7);
+const scripts = ORDER.concat(['ui/ui.js']);
+const id = crypto.createHash('sha1').update(scripts.map(r).join('') + r('ui/style.css') + r('ui/body.html') + LABEL).digest('hex').slice(0, 8);
+const js = single => `<script>var MG_BUILD = { label: ${JSON.stringify(LABEL)}, id: "${id}" };${single ? ' window.MG_SINGLE = true;' : ''}</script>\n` + scripts.map(f => `<script data-src="${f}">\n${r(f)}</script>`).join('\n');
+const reg = `<script>
+(function () {
+  if (!('serviceWorker' in navigator) || location.protocol === 'file:' || window.MG_SINGLE) return;
+  var had = !!navigator.serviceWorker.controller, reloading = false;
+  function reloadNow() { if (reloading) return; reloading = true; try { MG.UI.save(); } catch (e) { } location.reload(); }
+  navigator.serviceWorker.addEventListener('controllerchange', function () { if (!had) { had = true; return; } reloadNow(); });
+  function check(reg) {
+    if (reg) reg.update().catch(function () { });
+    fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (v) {
+      if (!v || v.id === MG_BUILD.id) return; var k = 'mg_reload_' + v.id; if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1'); setTimeout(reloadNow, 1500);
+    }).catch(function () { });
+  }
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (reg) {
+      check(reg); document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') check(reg); });
+      setInterval(function () { check(reg); }, 20 * 60 * 1000);
+    }).catch(function () { });
+  });
+})();
+</script>`;
+const page = single => `<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12263a"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Memory Game"><meta name="description" content="Memory Game: family learning with real sources. Works offline.">
+${single ? '' : '<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">'}
+<title>Memory Game</title>
+<style>
+${r('ui/style.css')}</style></head>
+<body>
+${r('ui/body.html')}
+${js(single)}${single ? '' : reg}
+</body></html>
+`;
+const OUT = process.env.MG_OUT ? path.resolve(process.env.MG_OUT) : path.join(__dirname, 'site'), S = p => path.join(OUT, p);
+const icons = ['icon-192', 'icon-512', 'maskable-192', 'maskable-512', 'apple-touch-icon'];
+fs.mkdirSync(S('icons'), { recursive: true }); icons.forEach(n => fs.copyFileSync(path.join(__dirname, 'src/icons', n + '.png'), S('icons/' + n + '.png')));
+const html = page(false); fs.writeFileSync(S('index.html'), html); fs.writeFileSync(S('.nojekyll'), '');
+fs.writeFileSync(S('manifest.webmanifest'), JSON.stringify({ name: 'Memory Game', short_name: 'Memory Game', start_url: './index.html', scope: './', display: 'standalone', orientation: 'any', background_color: '#12263a', theme_color: '#12263a',
+  icons: [['icon-192', '192x192', 'any'], ['icon-512', '512x512', 'any'], ['maskable-192', '192x192', 'maskable'], ['maskable-512', '512x512', 'maskable']].map(([n, s, p]) => ({ src: 'icons/' + n + '.png', sizes: s, type: 'image/png', purpose: p })) }, null, 1));
+const assets = ['./', 'index.html', 'manifest.webmanifest'].concat(icons.map(n => 'icons/' + n + '.png'));
+const cache = 'mg-' + crypto.createHash('sha1').update(html).digest('hex').slice(0, 10);
+fs.writeFileSync(S('version.json'), JSON.stringify({ label: LABEL, id, cache }));
+fs.writeFileSync(S('sw.js'), `// Service worker (${LABEL}). Page and version.json are NETWORK-FIRST so new versions show right away; cache is the offline fallback.
+const CACHE = '${cache}';
+const ASSETS = ${JSON.stringify(assets)};
+self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())); });
+self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
+self.addEventListener('fetch', e => {
+  const req = e.request; if (req.method !== 'GET') return;
+  const url = new URL(req.url); if (url.origin !== location.origin) return;
+  const page = req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('index.html') || url.pathname.endsWith('version.json');
+  if (page) { e.respondWith(fetch(req, { cache: 'no-store' }).then(res => { if (res.ok && !url.pathname.endsWith('version.json')) { const copy = res.clone(); caches.open(CACHE).then(c => c.put('index.html', copy)); } return res; }).catch(() => caches.match(req, { ignoreSearch: true }).then(hit => hit || caches.match('index.html')))); return; }
+  e.respondWith(caches.match(req, { ignoreSearch: true }).then(hit => hit || fetch(req).then(res => { if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); } return res; })));
+});
+`);
+if (process.env.MG_SINGLE) fs.writeFileSync(process.env.MG_SINGLE, page(true));
+console.log('Built', LABEL, id);
