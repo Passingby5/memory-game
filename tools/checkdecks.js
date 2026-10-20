@@ -23,6 +23,7 @@ function check(verbose) {
     const q = E.question(c, D.cards, r); n++;
     if (q.choices.length !== 3 || new Set(q.choices).size !== 3) errs.push(c.id + ': bad choices ' + q.choices);
     const nm = c.name.toLowerCase(); if (q.prompt.toLowerCase().includes(nm)) errs.push(c.id + ': clue names the answer');
+    { const pw = q.prompt.toLowerCase(); q.choices[q.answer].toLowerCase().split(/[^a-z]+/).filter(w => w.length >= 4).forEach(w => { const st = w.replace(/s$/, ''); if (new RegExp('\\b' + st).test(pw) && !q.choices.some((x, i) => i !== q.answer && x.toLowerCase().includes(st))) errs.push(c.id + ': clue word "' + w + '" is in the right choice'); }); }
     if (/Chinese|adaptogen/i.test(q.prompt)) q.choices.forEach(ch => { const x = D.cards.find(k => k.name === ch); if (!x.pinyin) errs.push(c.id + ': Chinese clue with non-Chinese choice ' + ch); });
     const len = q.choices.map(s => s.length), mx = Math.max(...len), mn = Math.min(...len);
     if (len[q.answer] === mx) rules.longest++; if (len[q.answer] === mn) rules.shortest++; if (q.answer === 0) rules.first++; if (q.answer === 2) rules.last++;
@@ -47,6 +48,14 @@ function check(verbose) {
     const ABS = /\b(always|never|only|all|every|none|nobody|nothing|forever|zero|entirely|completely|totally|any|ever)\b/i; let ab = 0;
     d.cards.forEach(c => { const ch = [c.a].concat(c.w), clean = ch.map(x => !ABS.test(x)), n = clean.filter(Boolean).length; ab += (n === 0 || n === 3) ? 1 / 3 : (clean[0] ? 1 / n : 0); });
     const abp = ab / d.cards.length; if (verbose) console.log(d.id, 'tell rule absoluteWord', (abp * 100).toFixed(1) + '%'); if (abp > 0.45) errs.push(d.id + ': absolute-word tell ' + (abp * 100).toFixed(1) + '% (limit 45%)');
+    // Opening tell (QA N-1): choices that open with Yes vs a negation (No, Not, It does not, They never...).
+    const YES = /^yes\b/i, NEG = /^(no|not|none|never|nothing|nobody)\b|^(it|they|you|he|she|we|this|that) (does|do|did|is|are|was|were|has|have|can|could|will|would) ?n[o']t\b|^(it|they|you|he|she|we) never\b|^(it|they|this) (is|are|was|were) not\b/i;
+    const strat = (pref, avoid) => { let h = 0; d.cards.forEach(c => { const ch = [c.a].concat(c.w); let pool = ch.map((x, i) => i).filter(i => pref.test(ch[i])); if (!pool.length) pool = ch.map((x, i) => i).filter(i => !avoid.test(ch[i])); if (!pool.length) pool = [0, 1, 2]; h += pool.includes(0) ? 1 / pool.length : 0; }); return h / d.cards.length; };
+    [['negFirst', NEG, YES], ['yesFirst', YES, NEG]].forEach(([k, p, a]) => { const v = strat(p, a); if (verbose) console.log(d.id, 'tell rule opening', k, (v * 100).toFixed(1) + '%'); if (v > 0.45) errs.push(d.id + ': opening tell ' + k + ' ' + (v * 100).toFixed(1) + '% (limit 45%)'); });
+    // Clue words (QA N-2): a 5+ letter word of the right answer that also appears in the question, on more than 10% of cards.
+    const STOP = new Set(['which','there','their','about','other','these','those','would','could','people','first','after','before','where','still','being']); let cw = 0;
+    d.cards.forEach(c => { const q = c.q.toLowerCase(); if (c.a.toLowerCase().split(/[^a-z\u00c0-\u1ef9]+/).some(w => w.length >= 5 && !STOP.has(w) && new RegExp('\\b' + w.replace(/s$/, '')).test(q) && !c.w.some(x => x.toLowerCase().includes(w)))) { cw++; if (verbose) console.log(d.id, c.id, 'clue word in answer'); } });
+    if (cw / d.cards.length > 0.1) errs.push(d.id + ': ' + cw + ' cards have a question word only in the right answer');
     // Exact-text tell: a first word that shows up in 6+ choices and is the right answer 70%+ of the time (or never).
     const fw = {}; d.cards.forEach(c => [c.a].concat(c.w).forEach((x, i) => { const k = x.split(/[ ,]/)[0].toLowerCase(); fw[k] = fw[k] || [0, 0]; fw[k][0]++; if (i === 0) fw[k][1]++; }));
     Object.entries(fw).forEach(([k, v]) => { if (v[0] >= 6 && (v[1] / v[0] >= 0.7)) errs.push(d.id + ': first word "' + k + '" is the answer ' + v[1] + ' of ' + v[0] + ' times'); });
