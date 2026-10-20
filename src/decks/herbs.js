@@ -74,7 +74,7 @@ MG.decks.herbs = { id: 'herbs', title: 'Herbs', doctor: 'This is for learning, n
     { name: 'Brigham tea (Ephedra species, in his Cold Away and Histamine formulas)', why: 'Same plant family as ephedra; stimulant safety data is thin. Left out until a trusted monograph confirms its safety.', src: N + 'ephedra' },
     { name: 'Bugleweed (in his Bleeding formula)', why: 'Lowers thyroid hormone. Not safe to self-dose without a doctor checking thyroid levels.', src: H + 'bleeding-tincture/' },
     { name: 'Ephedra (Ma Huang)', why: 'FDA banned ephedra supplements in 2004 after heart attacks, strokes and deaths.', src: N + 'ephedra' },
-    { name: 'Aristolochia (Guang Fang Ji, Ma Dou Ling)', why: 'Aristolochic acid causes kidney failure and urinary tract cancer; banned in many countries.', src: 'https://www.fda.gov/food/dietary-supplements/aristolochic-acid' },
+    { name: 'Aristolochia (Guang Fang Ji, Ma Dou Ling)', why: 'Aristolochic acid causes kidney failure and urinary tract cancer; banned in many countries.', src: 'https://en.wikipedia.org/wiki/Aristolochic_acid' },
     { name: 'Comfrey (by mouth)', why: 'Pyrrolizidine alkaloids cause serious liver damage.', src: M + 'comfrey' },
     { name: 'Butterbur (unprocessed)', why: 'Raw plant has liver-toxic pyrrolizidine alkaloids; only PA-free products are considered safe.', src: N + 'butterbur' },
     { name: 'Kava', why: 'Linked to severe liver injury; left out of a family deck.', src: N + 'kava' }

@@ -20,7 +20,7 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
     assert.strictEqual(await page.textContent('#ver'), v.label); assert(/^v\d+ - \w+ \d+ - \w{7}$/.test(v.label)); ok(vp.name + ' version label ' + v.label);
     assert.strictEqual(await page.locator('[data-act=sec],[data-act=soon]').count(), 6); await layout('home'); ok(vp.name + ' home lists 6 sections, no overflow, big targets');
     await shot('1-home.jpg');
-    await tap('[data-act=soon][data-id=history]'); assert(/Coming soon/.test(await page.textContent('[data-id=history]'))); ok(vp.name + ' coming soon tap');
+    await tap('[data-act=soon][data-id=vocab]'); assert(/Coming soon/.test(await page.textContent('[data-id=vocab]'))); ok(vp.name + ' coming soon tap');
     await tap('[data-act=sec][data-id=herbs]'); await layout('herbs'); await tap('[data-act=start]'); await layout('quiz');
     // double tap on a choice only counts once (debounce + answered lock)
     const ans = await page.evaluate(() => MG.UI.state().session.q.answer);
@@ -34,11 +34,20 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
     assert.strictEqual(await page.evaluate(() => MG.UI.state().session.i), qi); ok(vp.name + ' save and resume after reload');
     for (let i = qi; i < 10; i++) { await tap('[data-act=pick][data-i="0"]'); await tap('[data-act=next]'); }
     assert(/Done/.test(await page.textContent('h1'))); ok(vp.name + ' finished 10-question session');
-    await tap('[data-act=herbs]'); await tap('[data-act=lookup]'); await layout('lookup'); await tap('[data-act=sym][data-s="nausea"]'); assert(/Ginger/.test(await page.textContent('#app'))); await layout('symptom'); await shot('3-symptom-lookup.jpg'); ok(vp.name + ' symptom lookup nausea shows ginger');
+    await tap('[data-act=deck][data-id=herbs]'); await tap('[data-act=lookup]'); await layout('lookup'); await tap('[data-act=sym][data-s="nausea"]'); assert(/Ginger/.test(await page.textContent('#app'))); await layout('symptom'); await shot('3-symptom-lookup.jpg'); ok(vp.name + ' symptom lookup nausea shows ginger');
     await tap('[data-act=lookup].back'); await tap('[data-act=herbs].back'); await tap('[data-act=chinese]'); assert(/Ren Shen/.test(await page.textContent('#app'))); await layout('chinese'); await shot('4-chinese-hot-cold.jpg');
     await tap('[data-act=herbs]'); await tap('[data-act=body]'); await layout('body'); await tap('[data-act=herbs]'); await tap('[data-act=formulas]'); assert(/Cold Away/.test(await page.textContent('#app'))); await layout('formulas'); await shot('5-formulas.jpg'); await tap('[data-act=herbs]'); await tap('[data-act=dropped]'); assert(/Lobelia/.test(await page.textContent('#app'))); await tap('[data-act=herbs]');
     await tap('[data-act=browse]'); await tap('[data-act=herb][data-id=ginger]'); assert(/nccih/.test(await page.textContent('#app'))); await layout('herb'); ok(vp.name + ' chinese, body systems, dropped, browse pages');
     await tap('[data-act=browse]'); await tap('[data-act=herbs]'); await tap('[data-act=home]'); await tap('[data-act=about]'); assert(/mskcc/.test(await page.textContent('#app'))); await layout('about'); ok(vp.name + ' about page with sources');
+    // History deck: open, practice one set, answer, see why + sources, browse cards.
+    await tap('[data-act=home]'); await tap('[data-act=sec][data-id=history]'); await layout('history'); await shot('history-1-menu.jpg');
+    await tap('[data-act=start][data-set="Vietnam"]'); await layout('history quiz');
+    let hs = await page.evaluate(() => MG.UI.state().session); assert.strictEqual(hs.deck, 'history');
+    assert(hs.ids.every(id => true)); const hset = await page.evaluate(ids => ids.map(id => MG.decks.history.cards.find(c => c.id === id).set), hs.ids); assert(hset.every(x => x === 'Vietnam'));
+    await tap('[data-act=pick][data-i="' + hs.q.answer + '"]'); assert(/Right/.test(await page.textContent('#fb h2'))); assert(/wikipedia/.test(await page.textContent('#fb'))); await layout('history feedback'); await shot('history-2-answer.jpg');
+    ok(vp.name + ' history Vietnam set practice with sources');
+    await tap('[data-act=deck][data-id=history]'); await tap('[data-act=cards]'); assert(/Tel Dan/.test(await page.textContent('#app'))); await layout('history cards'); await shot('history-3-cards.jpg'); await tap('[data-act=deck].back'); await tap('[data-act=home]');
+    ok(vp.name + ' history browse cards');
     assert.deepStrictEqual(errors, [], vp.name + ' console errors'); ok(vp.name + ' no console errors or warnings');
     await ctx.close();
   }

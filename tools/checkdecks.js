@@ -29,6 +29,22 @@ function check(verbose) {
     const cn = q.choices.map(ch => !!D.cards.find(k => k.name === ch).pinyin); if (cn[q.answer] && cn.filter(Boolean).length === 1) rules.chineseName++;
   }); }
   Object.keys(rules).forEach(k => { const p = rules[k] / n; if (verbose) console.log('tell rule', k, (p * 100).toFixed(1) + '%'); if (p > 0.45) errs.push('tell rule ' + k + ' picks the answer ' + (p * 100).toFixed(1) + '% (limit 45%)'); });
+  // Every source URL must be in tools/verified-links.json with 200 (run node tools/linkcheck.js after adding sources).
+  const fs = require('fs'), VL = JSON.parse(fs.readFileSync(__dirname + '/verified-links.json'));
+  Object.values(MG.decks).forEach(d => (d.cards || []).forEach(c => (c.src || []).forEach(u => { if (VL[u] !== 200 && VL[u] !== 'manual-200') errs.push(d.id + ' ' + c.id + ': link not verified ' + u); })));
+  // Generic multiple choice decks: same surface rules, plus answer text appearing in the question, and exact-length ties.
+  Object.values(MG.decks).filter(d => d.cards && d.cards[0] && d.cards[0].q).forEach(d => {
+    const minCards = d.min || 50; if (d.cards.length < minCards) errs.push(d.id + ': need at least ' + minCards + ' cards, have ' + d.cards.length);
+    const ru = { longest: 0, shortest: 0, middle: 0, first: 0, mostWords: 0 }; let m = 0;
+    d.cards.forEach(c => { if (!c.src || !c.src.length) errs.push(d.id + ' ' + c.id + ': no source'); if (!c.why) errs.push(d.id + ' ' + c.id + ': no why');
+      if (new Set([c.a].concat(c.w)).size !== 3) errs.push(d.id + ' ' + c.id + ': duplicate choices');
+      if (/\u2014/.test(JSON.stringify(c))) errs.push(d.id + ' ' + c.id + ': em-dash');
+      if (c.a.length > 3 && c.q.toLowerCase().includes(c.a.toLowerCase())) errs.push(d.id + ' ' + c.id + ': question contains the answer'); });
+    for (let seed = 1; seed <= 20; seed++) { const r = E.rng(seed); d.cards.forEach(c => { const q = E.mcq(c, r); m++; const L = q.choices.map(x => x.length), Wd = q.choices.map(x => x.split(' ').length);
+      if (L[q.answer] === Math.max(...L) && L.filter(x => x === Math.max(...L)).length === 1) ru.longest++; if (L[q.answer] === Math.min(...L) && L.filter(x => x === Math.min(...L)).length === 1) ru.shortest++; if (q.answer === 0) ru.first++; { const so = L.slice().sort((x, y) => x - y); if (L[q.answer] === so[1] && so[0] !== so[1] && so[1] !== so[2]) ru.middle++; }
+      if (Wd[q.answer] === Math.max(...Wd) && Wd.filter(x => x === Math.max(...Wd)).length === 1) ru.mostWords++; }); }
+    Object.keys(ru).forEach(k => { const p = ru[k] / m; if (verbose) console.log(d.id, 'tell rule', k, (p * 100).toFixed(1) + '%'); if (p > 0.45) errs.push(d.id + ': tell rule ' + k + ' ' + (p * 100).toFixed(1) + '% (limit 45%)'); });
+  });
   return [...new Set(errs)];
 }
 exports.check = check;

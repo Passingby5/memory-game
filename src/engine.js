@@ -33,6 +33,8 @@ var MG = typeof MG !== 'undefined' ? MG : {};
   };
   // Remove the herb's own name from the clue so the prompt never gives away the answer.
   E.mask = function (t, card) { var names = [card.name].concat(card.name.split(/[ ()]+/).filter(function (w) { return w.length > 4; })); names.forEach(function (n) { t = t.split(n).join('this herb').split(n.toLowerCase()).join('this herb'); }); return t; };
+  // Generic multiple choice card {q, a, w:[2]}: choices are the answer plus two wrong answers, shuffled by the seeded RNG.
+  E.mcq = function (card, r) { var ch = E.shuffle([card.a].concat(card.w), r); return { kind: 'mcq', id: card.id, prompt: card.q, choices: ch, answer: ch.indexOf(card.a) }; };
   E.lookup = function (cards, sym) { return cards.filter(function (c) { return c.symptoms.indexOf(sym) >= 0; }); };
   E.allSymptoms = function (cards) { var s = {}; cards.forEach(function (c) { c.symptoms.forEach(function (x) { s[x] = 1; }); }); return Object.keys(s).sort(); };
 })();
