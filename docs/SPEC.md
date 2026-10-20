@@ -79,16 +79,19 @@ GRE Vocab
 - Sources checked by HTTP 200 on Oct 20, 2026: mskcc.org About Herbs pages and nccih.nih.gov fact sheets.
 - Dropped on purpose: ephedra, aristolochia, comfrey by mouth, unprocessed butterbur, kava.
 
-## Status (v7, Oct 20, 2026)
+## Status (v8, Oct 20, 2026)
 | Section | Cards | Checklist items | Status |
 |---|---|---|---|
 | Shell | n/a | 1 to 15 | Done (10: network-first SW built; reload path not browser-tested) |
 | Herbs | 49 (30 Dr. Jones, 19 more Chinese), 8 formulas, 8 left out | 16 to 24 | Done |
-| History | 64 | 25 to 28 | Done |
+| History | 72 | 25 to 28 | Done |
 | Memory Trainers | 4 trainers + 14 research cards | 29 to 30 | Done |
-| Survival Science | 61 | 31 to 33a | Done |
+| Survival Science | 64 | 31 to 33a | Done |
 | Truth or Lies | 52 | 34 | Done |
 | GRE Vocab | 64 | 35 to 36 | Done |
 
-Answer-tell checker (tools/checkdecks.js): longest, shortest, middle length, first position, most words, and repeated first word; every rule at or under 45% for every deck.
+Answer-tell checker (tools/checkdecks.js): longest, shortest, middle length, first position, most words, repeated first word, and absolute words (always, never, only, all, none) in the right answer; every rule at or under 45% for every deck.
 Link checker (tools/linkcheck.js): every source URL verified (Wikipedia and Wiktionary via the MediaWiki API, others with HTTP GET; homegrownherbalist.net blocks the box and was verified by page fetch).
+
+Herb safety (v8, per Tom): no per-card pregnancy text; avoiding herbs in pregnancy is treated as a given for this family. Specific warnings kept: St. John's wort (see a doctor for depression, drug interactions), Circulatory Support (do not stop prescribed blood pressure medicine), Asian ginseng (not for children).
+Tests: `npm test` writes its single-file copy to tmp/test-copy.html. `npm run testcopy` writes /workspace/memory-game-test.html.
