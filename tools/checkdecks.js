@@ -43,6 +43,10 @@ function check(verbose) {
     for (let seed = 1; seed <= 20; seed++) { const r = E.rng(seed); d.cards.forEach(c => { const q = E.mcq(c, r); m++; const L = q.choices.map(x => x.length), Wd = q.choices.map(x => x.split(' ').length);
       if (L[q.answer] === Math.max(...L) && L.filter(x => x === Math.max(...L)).length === 1) ru.longest++; if (L[q.answer] === Math.min(...L) && L.filter(x => x === Math.min(...L)).length === 1) ru.shortest++; if (q.answer === 0) ru.first++; { const so = L.slice().sort((x, y) => x - y); if (L[q.answer] === so[1] && so[0] !== so[1] && so[1] !== so[2]) ru.middle++; }
       if (Wd[q.answer] === Math.max(...Wd) && Wd.filter(x => x === Math.max(...Wd)).length === 1) ru.mostWords++; }); }
+    // Absolute-word tell (QA M-6): guess among choices WITHOUT words like always/never/only/all; expected hit rate must stay <= 45%.
+    const ABS = /\b(always|never|only|all|every|none|nobody|nothing|forever|zero|entirely|completely|totally|any|ever)\b/i; let ab = 0;
+    d.cards.forEach(c => { const ch = [c.a].concat(c.w), clean = ch.map(x => !ABS.test(x)), n = clean.filter(Boolean).length; ab += (n === 0 || n === 3) ? 1 / 3 : (clean[0] ? 1 / n : 0); });
+    const abp = ab / d.cards.length; if (verbose) console.log(d.id, 'tell rule absoluteWord', (abp * 100).toFixed(1) + '%'); if (abp > 0.45) errs.push(d.id + ': absolute-word tell ' + (abp * 100).toFixed(1) + '% (limit 45%)');
     // Exact-text tell: a first word that shows up in 6+ choices and is the right answer 70%+ of the time (or never).
     const fw = {}; d.cards.forEach(c => [c.a].concat(c.w).forEach((x, i) => { const k = x.split(/[ ,]/)[0].toLowerCase(); fw[k] = fw[k] || [0, 0]; fw[k][0]++; if (i === 0) fw[k][1]++; }));
     Object.entries(fw).forEach(([k, v]) => { if (v[0] >= 6 && (v[1] / v[0] >= 0.7)) errs.push(d.id + ': first word "' + k + '" is the answer ' + v[1] + ' of ' + v[0] + ' times'); });

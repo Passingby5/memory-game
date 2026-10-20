@@ -5,7 +5,30 @@ var MG = typeof MG !== 'undefined' ? MG : {}; MG.decks = MG.decks || {};
 (function () {
 var W = function (t) { return 'https://en.wikipedia.org/wiki/' + encodeURIComponent(t.replace(/ /g, '_')); };
 var EPA = 'https://www.epa.gov/ground-water-and-drinking-water/emergency-disinfection-drinking-water';
+// Safety level for each water method (QA M-5). Keyed by a phrase in the question.
+var LEVEL = [
+['sewage: what must','Full multi-barrier treatment: the minimum for sewage-polluted water. Chemicals can still remain.'],
+['still remain','Germs: handled by full treatment. Chemicals: not removed at home.'],
+['sari','Level 1, pre-filter: reduces some germs. Still disinfect.'],
+['biosand','Level 2, filter: removes most germs and dirt when run daily. Still disinfect.'],
+['charcoal','Taste only: does not make water safe from germs.'],
+['alum','Level 1, clears water only: still needs filtering and disinfecting.'],
+['clarifier','Level 1, clears water only: still needs filtering and disinfecting.'],
+['SODIS','Level 3, disinfects clear water from most germs. Not for cloudy water.'],
+['rolling boil','Level 3, disinfects: the most reliable home method for germs. Does not remove chemicals.'],
+['bleach','Level 3, disinfects clear water from most bacteria and viruses. Weaker against some parasites (Cryptosporidium).'],
+['cloudy water','Level 3 only after level 1 and 2: settle and filter, then chlorinate.'],
+['heavy metals','No home method: find another water source.'],
+['best order','Full multi-barrier: settle, filter, disinfect.'],
+['Clay pot','Level 2, filter: removes most bacteria. Store water covered.'],
+['seawater','Distillation removes salt and germs. Plain boiling does neither for salt.'],
+['Sphere','Quantity standard, not a treatment method.'],
+['spring box','Source protection: keeps germs out. Still treat if unsure.']
+];
 var C = [
+['Water','Water polluted with sewage: what must it go through before anyone drinks it?','Settling, filtering and disinfecting','A cloth strain and nothing else','A night in a clean bucket','Sewage water carries many germs and worms. Use every barrier: settle (or alum or moringa), filter (biosand or ceramic), then boil or chlorinate. Find a cleaner source if you can.',[W('Water purification'),W('Sewage')]],
+['Water','After settling, filtering and boiling water that had sewage in it, what risk can still remain?','Chemicals and medicines in it','Germs made by boiling','Extra salt from the filter','Home treatment handles germs. It does not remove fuel, pesticides, metals or medicines that run off with sewage.',[W('Water purification'),W('Water pollution')]],
+['Water','In Bangladesh, straining water through an old sari folded several times cut cholera by about how much?','About half','About a tenth','About 90 percent','A 2003 study (Colwell and others) found about 48% less cholera. Cloth catches the tiny animals that carry cholera germs, but the water still needs disinfecting.',[W('Sari filter'),W('Cholera')]],
 ['Water','In a biosand (slow sand) filter, which layer does most of the germ removal?','The living top layer','The bottom gravel layer','The plastic outlet pipe','A thin living film called the schmutzdecke forms on top of the sand. It traps and eats germs, so the filter must stay wet.',[W('Slow sand filter'),W('Biosand filter')]],
 ['Water','What does charcoal in a home water filter mainly improve?','Taste, smell and some chemicals','It kills all the bacteria in the water','It takes out the salt','Activated carbon sticks many chemicals to its surface. It does not reliably kill germs, so you still need to disinfect.',[W('Activated carbon')]],
 ['Water','What does a small dose of alum do to muddy water?','Clumps dirt so it settles','Kills every germ in it','Removes dissolved salt','Alum (aluminum sulfate) makes tiny particles stick together into flocs that sink. Pour off the clear water, then filter and disinfect.',[W('Flocculation'),W('Aluminium sulfate')]],
@@ -71,6 +94,6 @@ var C = [
 MG.decks.survival = { id: 'survival', title: 'Survival Science', note: 'Practical chemistry, physics and engineering for daily life and rebuilding a town. Safety levels are honest. Dangerous reactions are taught only as recognize and avoid.',
   sets: ['Water', 'Home Chemistry', 'Food and Seeds', 'Sanitation', 'Water Supply', 'Electricity', 'Roads and Structures', 'Safety: Recognize and Avoid'],
   setNotes: { 'Water': 'Honest safety levels: settling and alum or moringa only clear water. Filters reduce germs. Boiling, chlorine or full SODIS disinfect. No home method removes chemical pollution.' },
-  cards: C.map(function (a, i) { return { id: 's' + (i + 1), set: a[0], q: a[1], a: a[2], w: [a[3], a[4]], why: a[5], src: a[6] }; }) };
+  cards: C.map(function (a, i) { var c = { id: 's' + (i + 1), set: a[0], q: a[1], a: a[2], w: [a[3], a[4]], why: a[5], src: a[6] }; if (a[0] === 'Water') LEVEL.forEach(function (l) { if (!c.level && a[1].indexOf(l[0]) >= 0) c.level = l[1]; }); return c; }) };
 })();
 if (typeof module !== 'undefined') module.exports = MG;

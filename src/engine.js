@@ -11,13 +11,29 @@ var MG = typeof MG !== 'undefined' ? MG : {};
   E.grade = function (st, id, ok, now) { var b = st.boxes[id] || { box: 1, due: 0 }; b.box = ok ? Math.min(5, b.box + 1) : 1; b.due = now + E.INTERVAL[b.box] * E.DAY; st.boxes[id] = b; st.stats[ok ? 'right' : 'wrong']++; return b; };
   E.dueCards = function (st, cards, now) { return cards.filter(function (c) { var b = st.boxes[c.id]; return !b || b.due <= now; }).sort(function (a, b) { var x = st.boxes[a.id], y = st.boxes[b.id]; return (x ? x.box : 0) - (y ? y.box : 0); }); };
   // Save versioning: v1 kept a flat {leitner:{id:box}}; v2 stores {box,due}. Unknown or broken saves start fresh.
-  E.migrate = function (raw) {
+  E.migrate = function (raw, decks) {
     var s; try { s = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { return E.newState(); }
-    if (!s || typeof s !== 'object') return E.newState();
-    if (s.v === 1) { var n = E.newState(); Object.keys(s.leitner || {}).forEach(function (k) { n.boxes[k] = { box: s.leitner[k], due: 0 }; }); n.stats = s.stats || n.stats; return n; }
+    if (!s || typeof s !== 'object' || Array.isArray(s)) return E.newState();
+    if (s.v === 1) { var n = E.newState(); Object.keys(s.leitner || {}).forEach(function (k) { n.boxes[k] = { box: s.leitner[k], due: 0 }; }); n.stats = s.stats || n.stats; return E.sanitize(n, decks); }
     if (s.v !== E.SAVE_VERSION) return E.newState();
-    if (!s.best) s.best = {};
-    return s;
+    return E.sanitize(s, decks);
+  };
+  // Repairs any v2-shaped save: bad or missing fields get defaults; a session pointing at a missing deck or card is dropped.
+  E.sanitize = function (s, decks) {
+    var o = E.newState(), num = function (x) { return typeof x === 'number' && isFinite(x); };
+    if (num(s.seed)) o.seed = s.seed >>> 0 || 1;
+    if (s.stats && typeof s.stats === 'object') { o.stats.right = num(s.stats.right) && s.stats.right >= 0 ? s.stats.right : 0; o.stats.wrong = num(s.stats.wrong) && s.stats.wrong >= 0 ? s.stats.wrong : 0; }
+    if (s.boxes && typeof s.boxes === 'object' && !Array.isArray(s.boxes)) Object.keys(s.boxes).forEach(function (k) { var b = s.boxes[k]; if (b && num(b.box) && b.box >= 1 && b.box <= 5 && num(b.due)) o.boxes[k] = { box: Math.floor(b.box), due: b.due }; });
+    if (s.best && typeof s.best === 'object' && !Array.isArray(s.best)) ['span', 'nback', 'palace'].forEach(function (k) { if (num(s.best[k]) && s.best[k] >= 0) o.best[k] = s.best[k]; });
+    var ss = s.session; if (ss && decks && E.validSession(ss, decks)) o.session = { deck: ss.deck, ids: ss.ids.slice(), i: ss.i, q: ss.q, answered: !!ss.answered };
+    return o;
+  };
+  E.validSession = function (ss, decks) {
+    if (!ss || typeof ss !== 'object' || !decks[ss.deck] || !Array.isArray(ss.ids) || !ss.ids.length) return false;
+    var ids = {}; (decks[ss.deck].cards || []).forEach(function (c) { ids[c.id] = 1; });
+    if (!ss.ids.every(function (x) { return ids[x]; })) return false;
+    if (typeof ss.i !== 'number' || ss.i < 0 || ss.i >= ss.ids.length || ss.i % 1) return false;
+    var q = ss.q; return !!(q && q.id === ss.ids[ss.i] && Array.isArray(q.choices) && q.choices.length === 3 && typeof q.answer === 'number' && q.answer >= 0 && q.answer < 3 && typeof q.prompt === 'string');
   };
   // Question kinds. Choices are always 3 herb names, so the right answer cannot be spotted by wording or length alone.
   E.question = function (card, cards, r) {
@@ -43,6 +59,14 @@ var MG = typeof MG !== 'undefined' ? MG : {};
   E.nback = function (r, n, len, rate) { var L = 'BCDFGHJKLMNPRSTV', s = []; for (var i = 0; i < len; i++) { if (i >= n && r() < rate) s.push(s[i - n]); else { var c; do { c = L[Math.floor(r() * L.length)]; } while (i >= n && c === s[i - n]); s.push(c); } } return s; };
   E.nbackScore = function (seq, n, taps) { var hits = 0, misses = 0, fa = 0; seq.forEach(function (c, i) { var t = i >= n && seq[i - n] === c, p = taps.indexOf(i) >= 0; if (t && p) hits++; else if (t) misses++; else if (p) fa++; }); return { hits: hits, misses: misses, falseAlarms: fa, pct: Math.round(100 * hits / Math.max(1, hits + misses + fa)) }; };
   E.palaceRound = function (r, P) { var items = E.shuffle(P.items, r).slice(0, P.places.length); return P.places.map(function (pl, i) { return { place: pl, item: items[i] }; }); };
+  // Builds the vocab deck from MG.vocabData. Wrong choices use fixed offsets so the deck is the same every build.
+  E.buildVocab = function (VD) { var V = VD.words, bad = VD.alsoFits || {};
+    function wrongs(i) { var me = V[i], out = [], no = bad[me[0]] || []; for (var k = 7; k < 7 + V.length * 11 && out.length < 2; k += 11) { var x = V[(i + k) % V.length]; if (x[1] === me[1] && x[2] !== me[2] && out.indexOf(x[0]) < 0 && x[0] !== me[0] && no.indexOf(x[0]) < 0) out.push(x[0]); }
+      for (var j = 1; j < V.length && out.length < 2; j++) { var y = V[(i + j) % V.length]; if (y[1] === me[1] && y[2] !== me[2] && out.indexOf(y[0]) < 0 && y[0] !== me[0] && no.indexOf(y[0]) < 0) out.push(y[0]); } return out; }
+    return { id: 'vocab', title: VD.title, note: VD.note, sets: ['Verbs', 'Adjectives', 'Nouns'],
+      cards: V.map(function (v, i) { return { id: 'v' + (i + 1), set: { verb: 'Verbs', adj: 'Adjectives', noun: 'Nouns' }[v[1]], q: v[5], a: v[0], w: wrongs(i), pos: v[1], def: v[3], vi: v[4],
+        why: v[0] + ' (' + v[1] + '): ' + v[3] + '. Tiếng Việt: ' + v[4] + '.', src: ['https://en.wiktionary.org/wiki/' + v[0], 'https://vi.wiktionary.org/wiki/' + v[0]] }; }) }; };
+  if (MG.vocabData && MG.decks) MG.decks.vocab = E.buildVocab(MG.vocabData);
   E.lookup = function (cards, sym) { return cards.filter(function (c) { return c.symptoms.indexOf(sym) >= 0; }); };
   E.allSymptoms = function (cards) { var s = {}; cards.forEach(function (c) { c.symptoms.forEach(function (x) { s[x] = 1; }); }); return Object.keys(s).sort(); };
 })();

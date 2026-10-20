@@ -3,7 +3,7 @@
 // Writes tools/verified-links.json, which the deck checker requires every card URL to appear in.
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const vm = require('vm'); const ctx = {}; vm.createContext(ctx);
-fs.readdirSync(path.join(__dirname, '../src/decks')).forEach(f => vm.runInContext(fs.readFileSync(path.join(__dirname, '../src/decks', f), 'utf8'), ctx));
+require('../tests/load.js').ORDER.forEach(f => vm.runInContext(fs.readFileSync(path.join(__dirname, '../src', f), 'utf8'), ctx));
 const urls = new Set(); Object.values(ctx.MG.decks).forEach(d => { (d.cards || []).forEach(c => (c.src || []).forEach(u => urls.add(u))); (d.formulas || []).forEach(f => urls.add(f.url)); (d.dropped || []).forEach(x => urls.add(x.src)); (d.sources || []).forEach(s => urls.add(s[1])); });
 (ctx.MG.herbSources || []).forEach(s => urls.add(s[1]));
 const MANUAL = /^https:\/\/homegrownherbalist\.net\//;

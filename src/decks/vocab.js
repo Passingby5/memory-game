@@ -1,6 +1,6 @@
 // GRE vocabulary deck data only: [word, part of speech, synonym group, English meaning, Vietnamese meaning, sentence with ____].
-// Sources per word: English Wiktionary (definition) and Vietnamese Wiktionary (Vietnamese meaning). Wrong choices are other words
-// of the same part of speech from a different meaning group, so they never fit the sentence.
+// Data only. The engine (E.buildVocab) picks wrong choices: same part of speech, different meaning group, never in alsoFits.
+// Sources per word: English Wiktionary (definition) and Vietnamese Wiktionary (Vietnamese meaning).
 var MG = typeof MG !== 'undefined' ? MG : {}; MG.decks = MG.decks || {};
 (function () {
 var V = [
@@ -69,14 +69,8 @@ var V = [
 ['verbose','adj','wordy','using more words than needed','dài dòng, rườm rà','The ____ instructions took ten pages to explain one simple step.'],
 ['zealous','adj','eager','full of energy for a cause','hăng hái, nhiệt tình','The ____ volunteers worked all night to fill sandbags.']
 ];
-var E = function (w) { return 'https://en.wiktionary.org/wiki/' + w; }, VI = function (w) { return 'https://vi.wiktionary.org/wiki/' + w; };
-// Pick two wrong words: same part of speech, different meaning group, chosen by fixed offsets so the deck is the same every build.
-function wrongs(i) { var me = V[i], out = [], k = 7; while (out.length < 2 && k < V.length * 3) { var x = V[(i + k) % V.length]; if (x[1] === me[1] && x[2] !== me[2] && out.indexOf(x[0]) < 0 && x[0] !== me[0]) out.push(x[0]); k += (V.length % 11 ? 11 : 13); if (k > V.length * 2) k = k % V.length + 1; } return out; }
-MG.decks.vocab = { id: 'vocab', title: 'GRE Vocab', note: 'Pick the word that fits. After you choose, see the sentence filled in, the meaning, and the Vietnamese.',
-  sets: ['Verbs', 'Adjectives', 'Nouns'],
-  cards: V.map(function (v, i) { return { id: 'v' + (i + 1), set: { verb: 'Verbs', adj: 'Adjectives', noun: 'Nouns' }[v[1]], q: v[5], a: v[0], w: wrongs(i), pos: v[1], def: v[3], vi: v[4],
-    why: v[0] + ' (' + v[1] + '): ' + v[3] + '. Tiếng Việt: ' + v[4] + '.', src: [E(v[0]), VI(v[0])] }; }) };
-MG.fb = MG.fb || {};
-MG.fb.vocab = function (c, esc) { return '<div class="card"><p id="filled">' + esc(c.q).replace('____', '<b><u>' + esc(c.a) + '</u></b>') + '</p><p><b>' + esc(c.a) + '</b> (' + esc(c.pos) + '): ' + esc(c.def) + '</p><p lang="vi"><b>Tiếng Việt:</b> ' + esc(c.vi) + '</p></div>'; };
+MG.vocabData = { words: V, title: 'GRE Vocab', note: 'Pick the word that fits. After you choose, see the sentence filled in, the meaning, and the Vietnamese.',
+  // Words that would also fit a sentence (QA m-2), so they are never offered as wrong choices for it.
+  alsoFits: { mitigate: ['ameliorate', 'abate'], sanguine: ['candid'], pragmatic: ['conciliatory'], incisive: ['meticulous', 'cogent'], abate: ['mitigate'], ameliorate: ['mitigate'] } };
 })();
 if (typeof module !== 'undefined') module.exports = MG;
