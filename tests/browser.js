@@ -20,7 +20,7 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
     assert.strictEqual(await page.textContent('#ver'), v.label); assert(/^v\d+ - \w+ \d+ - \w{7}$/.test(v.label)); ok(vp.name + ' version label ' + v.label);
     assert.strictEqual(await page.locator('[data-act=sec],[data-act=soon]').count(), 6); await layout('home'); ok(vp.name + ' home lists 6 sections, no overflow, big targets');
     await shot('1-home.jpg');
-    await tap('[data-act=soon][data-id=vocab]'); assert(/Coming soon/.test(await page.textContent('[data-id=vocab]'))); ok(vp.name + ' coming soon tap');
+    if (await page.locator('[data-act=soon]').count()) { const sid = await page.getAttribute('[data-act=soon]', 'data-id'); await tap('[data-act=soon][data-id=' + sid + ']'); assert(/Coming soon/.test(await page.textContent('[data-id=' + sid + ']'))); ok(vp.name + ' coming soon tap'); }
     await tap('[data-act=sec][data-id=herbs]'); await layout('herbs'); await tap('[data-act=start]'); await layout('quiz');
     // double tap on a choice only counts once (debounce + answered lock)
     const ans = await page.evaluate(() => MG.UI.state().session.q.answer);
@@ -48,6 +48,12 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
     ok(vp.name + ' history Vietnam set practice with sources');
     await tap('[data-act=deck][data-id=history]'); await tap('[data-act=cards]'); assert(/Tel Dan/.test(await page.textContent('#app'))); await layout('history cards'); await shot('history-3-cards.jpg'); await tap('[data-act=deck].back'); await tap('[data-act=home]');
     ok(vp.name + ' history browse cards');
+    // Other quiz decks: open, practice, answer right, see why and sources, browse.
+    for (const dk of ['survival', 'truth', 'vocab']) { if (!(await page.evaluate(k => !!MG.decks[k], dk))) continue;
+      if (await page.locator('[data-act=home]').count()) await tap('[data-act=home]'); await tap('[data-act=sec][data-id=' + dk + ']'); await layout(dk + ' menu'); await shot(dk + '-1-menu.jpg');
+      await tap('[data-act=start][data-deck=' + dk + ']'); const a2 = await page.evaluate(() => MG.UI.state().session.q.answer); await tap('[data-act=pick][data-i="' + a2 + '"]');
+      assert(/Right/.test(await page.textContent('#fb h2'))); assert(/(wikipedia|wiktionary)/.test(await page.textContent('#fb'))); await layout(dk + ' feedback'); await shot(dk + '-2-answer.jpg');
+      await tap('[data-act=deck].back'); await tap('[data-act=cards]'); await layout(dk + ' cards'); await tap('[data-act=deck].back'); await tap('[data-act=home]'); ok(vp.name + ' ' + dk + ' deck practice, sources, browse'); }
     // Memory trainers
     await tap('[data-act=sec][data-id=memory]'); await layout('memory menu'); await shot('memory-1-menu.jpg');
     await tap('[data-act=span]'); await page.waitForSelector('[data-act=spandone]', { timeout: 10000 }); await layout('digit pad');

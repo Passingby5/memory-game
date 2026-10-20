@@ -19,4 +19,5 @@ t('digit span: digits seeded, length adapts', () => { assert.strictEqual(E.digit
 t('n-back: sequence has targets, scoring counts hits and false taps', () => { const seq = E.nback(E.rng(9), 2, 20, 0.3), tg = seq.map((c, i) => i >= 2 && seq[i - 2] === c ? i : -1).filter(i => i >= 0); assert(tg.length >= 2); const sc = E.nbackScore(seq, 2, tg); assert.strictEqual(sc.pct, 100); assert.strictEqual(E.nbackScore(seq, 2, [0]).falseAlarms, 1); });
 t('memory palace round: 8 places, 8 different items', () => { const r = E.palaceRound(E.rng(1), MG.palace); assert.strictEqual(r.length, 8); assert.strictEqual(new Set(r.map(x => x.item)).size, 8); });
 t('memory research cards: 4 sets with sources', () => { const M = MG.decks.memory; M.sets.forEach(x => assert(M.cards.some(c => c.set === x))); M.cards.forEach(c => assert(c.src.length)); });
+t('survival: 50+ cards, 8 sets incl. town utilities and safety', () => { const S = MG.decks.survival; assert(S.cards.length >= 50); S.sets.forEach(x => assert(S.cards.some(c => c.set === x), x)); assert(S.cards.filter(c => /\d/.test(c.why) && /[x=\/]/.test(c.why)).length >= 6, 'calculations'); });
 console.log('unit: ' + n + ' passed');
