@@ -14,7 +14,7 @@
   // Digit span
   T.span = { len: 3, strikes: 0, cur: '', typed: '' };
   T.spanStart = function (st, r) { var S = T.span; S.cur = E.digits(r, S.len); S.typed = ''; var i = 0;
-    app.innerHTML = '<h1>Digit span</h1><p>Watch the digits, then type them in order. Length: ' + S.len + '</p><div class="card big" id="flash">Get ready</div>';
+    app.innerHTML = '<h1>Digit span</h1><p>Watch the digits, then type them in order. Length: ' + S.len + '</p><div class="card big" id="flash">Get ready</div><button data-act="memory" class="back">Quit</button>';
     (function tick() { var f = document.getElementById('flash'); if (!f) return; if (i < S.cur.length) { f.textContent = S.cur[i++]; timer = setTimeout(function () { f.textContent = ''; timer = setTimeout(tick, 200); }, T.speed()); } else T.spanPad(); })(); };
   T.spanPad = function () { var S = T.span; app.innerHTML = '<h1>Digit span</h1><p>Type the ' + S.len + ' digits.</p><div class="card big" id="typed">' + (esc(S.typed) || '&nbsp;') + '</div><div class="pad">' + '1234567890'.split('').map(function (d) { return b('digit', d, ' data-d="' + d + '"'); }).join('') + b('undo', 'Delete') + b('spandone', 'Done') + '</div>' + b('memory', 'Quit', '', 'back'); };
   T.spanCheck = function (st) { var S = T.span, ok = S.typed === S.cur, msg; if (ok) { st.best.span = Math.max(st.best.span || 0, S.len); S.strikes = 0; } else S.strikes++;
