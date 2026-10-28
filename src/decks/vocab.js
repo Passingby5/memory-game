@@ -184,7 +184,7 @@ var V = [
 ['onerous', 'adj', 'hard', 'heavy, burdensome and hard to bear', 'nặng nề, khó nhọc', 'The ____ paperwork took the farmer three full days.'],
 ["opaque", "adj", "unclear", "not see-through; hard to understand", "đục, mờ; khó hiểu", "The agency's ____ rules left people guessing how to apply."],
 ['ostracize', 'verb', 'exclude', 'to shut someone out of a group', 'tẩy chay, khai trừ', 'The village chose to ____ anyone who broke the water rules.'],
-['paradigm', 'noun', 'model', 'a typical model or way of thinking', 'mô hình, hệ biến hóa', 'The germ theory created a new ____ in medicine.'],
+['paradigm', 'noun', 'model', 'a typical model or way of thinking', 'mô hình, hệ mẫu', 'The germ theory created a new ____ in medicine.'],
 ['paradox', 'noun', 'puzzle', 'a statement that seems to contradict itself but may be true', 'nghịch lý', 'It is a ____ that the more choices we have, the harder it is to choose.'],
 ['peripheral', 'adj', 'minor', 'on the edge; not central', 'ngoại vi, thứ yếu', 'The lawyer said the date was a ____ detail, not the main issue.'],
 ["pernicious", "adj", "harmful", "causing great harm, often in a hidden way", "độc hại, nguy hại", "Rumors had a ____ effect on the town's trust."],
