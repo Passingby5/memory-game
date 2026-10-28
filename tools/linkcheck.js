@@ -2,7 +2,7 @@
 // Wikipedia and every wiki mirror are refused outright (Tom, Oct 27). Plain GET with curl first (HTTP 200).
 // Sites behind a bot wall (Britannica, Merriam-Webster, CDC...) are opened in a real Chrome window (DISPLAY) and pass only when
 // the page title is a real article, not a challenge or error page. Cambridge returns 200 for unknown words, so its pages must
-// contain the headword. homegrownherbalist.net blocks the box and was checked by page fetch (MANUAL).
+// contain the headword; vdict.com (English-Vietnamese) pages must hold a definition block. homegrownherbalist.net blocks the box and was checked by page fetch (MANUAL).
 // Usage: node tools/linkcheck.js [--recheck]   (without --recheck, URLs already verified 200 are kept).
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const vm = require('vm'); const ctx = {}; vm.createContext(ctx);
@@ -20,8 +20,9 @@ const todo = [];
 const browserList = [];
 todo.forEach(u => { if (BROWSER.test(u)) return browserList.push(u); let c = '000';
   try { if (/dictionary\.cambridge\.org/.test(u)) { const w = decodeURIComponent(u.split('/').pop()).toLowerCase(), h = curl([u]).toLowerCase(); c = h.includes('class="hw dhw">' + w) || h.includes('<span class="hw dhw">' + w) ? 200 : 'NO-HEADWORD'; }
+    else if (/vdict\.com/.test(u)) { const h = curl([u]); c = (h.match(/meaning/g) || []).length >= 3 ? 200 : 'NO-ENTRY'; }
     else c = +curl(['-o', '/dev/null', '-w', '%{http_code}', u]) || 'ERR'; } catch (e) { c = 'ERR'; }
-  if (c !== 200 && c !== 'NO-HEADWORD') browserList.push(u); else out[u] = c; });
+  if (c !== 200 && c !== 'NO-HEADWORD' && c !== 'NO-ENTRY') browserList.push(u); else out[u] = c; });
 const done = () => { fs.writeFileSync(file, JSON.stringify(out, null, 1)); const bad = Object.entries(out).filter(([u, c]) => c !== 200 && c !== 'manual-200'); console.log('links', Object.keys(out).length, 'bad', bad.length); bad.forEach(b => console.log(b[1], b[0])); };
 if (!browserList.length) return done();
 (async () => { const { chromium } = require('playwright-core'); const exe = ['/usr/bin/google-chrome', '/usr/bin/chromium'].find(f => fs.existsSync(f));

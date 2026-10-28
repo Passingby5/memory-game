@@ -75,11 +75,13 @@ var MG = typeof MG !== 'undefined' ? MG : {};
   E.palaceRound = function (r, P) { var items = E.shuffle(P.items, r).slice(0, P.places.length); return P.places.map(function (pl, i) { return { place: pl, item: items[i] }; }); };
   // Builds the vocab deck from MG.vocabData. Wrong choices use fixed offsets so the deck is the same every build.
   E.buildVocab = function (VD) { var V = VD.words, bad = VD.alsoFits || {};
-    function wrongs(i) { var me = V[i], out = [], no = bad[me[0]] || []; for (var k = 7; k < 7 + V.length * 11 && out.length < 2; k += 11) { var x = V[(i + k) % V.length]; if (x[1] === me[1] && x[2] !== me[2] && out.indexOf(x[0]) < 0 && x[0] !== me[0] && no.indexOf(x[0]) < 0) out.push(x[0]); }
+    var art = function (v) { var m = v[5].match(/\b(a|an) ____/i); return m ? m[1].toLowerCase() : ''; }, vow = function (w) { return /^[aeiou]/i.test(w) ? 'an' : 'a'; };
+    function okArt(me, x) { var a = art(me); return !a || vow(x[0]) === a; }
+    function wrongs(i) { var me = V[i], out = [], no = (bad[me[0]] || []).concat(V.filter(function (x) { return !okArt(me, x); }).map(function (x) { return x[0]; })); for (var k = 7; k < 7 + V.length * 11 && out.length < 2; k += 11) { var x = V[(i + k) % V.length]; if (x[1] === me[1] && x[2] !== me[2] && out.indexOf(x[0]) < 0 && x[0] !== me[0] && no.indexOf(x[0]) < 0) out.push(x[0]); }
       for (var j = 1; j < V.length && out.length < 2; j++) { var y = V[(i + j) % V.length]; if (y[1] === me[1] && y[2] !== me[2] && out.indexOf(y[0]) < 0 && y[0] !== me[0] && no.indexOf(y[0]) < 0) out.push(y[0]); } return out; }
     return { id: 'vocab', title: VD.title, note: VD.note, sets: ['Verbs', 'Adjectives', 'Nouns'],
       cards: V.map(function (v, i) { return { id: 'v' + (i + 1), set: { verb: 'Verbs', adj: 'Adjectives', noun: 'Nouns' }[v[1]], q: v[5], a: v[0], w: wrongs(i), pos: v[1], def: v[3], vi: v[4],
-        why: v[0] + ' (' + v[1] + '): ' + v[3] + '. Tiếng Việt: ' + v[4] + '.', src: ['https://en.wiktionary.org/wiki/' + v[0], 'https://vi.wiktionary.org/wiki/' + v[0]] }; }) }; };
+        why: v[0] + ' (' + v[1] + '): ' + v[3] + '. Tiếng Việt: ' + v[4] + '.', src: ['https://dictionary.cambridge.org/dictionary/english/' + v[0], 'https://vdict.com/' + v[0] + ',1,0,0.html'] }; }) }; };
   if (MG.vocabData && MG.decks) MG.decks.vocab = E.buildVocab(MG.vocabData);
   E.lookup = function (cards, sym) { return cards.filter(function (c) { return c.symptoms.indexOf(sym) >= 0; }); };
   E.allSymptoms = function (cards) { var s = {}; cards.forEach(function (c) { c.symptoms.forEach(function (x) { s[x] = 1; }); }); return Object.keys(s).sort(); };
