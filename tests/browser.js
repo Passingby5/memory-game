@@ -64,7 +64,7 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
     await tap('[data-act=sec][data-id=history]'); await tap('[data-act=cards][data-deck=history]'); tx = await page.textContent('#app'); assert(/No outside record found yet/.test(tx) && /Traditional date/.test(tx));
     await page.evaluate(() => [...document.querySelectorAll('h2')].find(h => h.textContent === 'Bible Timeline').scrollIntoView()); await shot('fix-2-bible-records.jpg'); await page.goBack(); await page.waitForTimeout(300); await page.goBack(); await page.waitForTimeout(300);
     assert(await page.locator('#ver').count() === 1, 'two backs reach home');
-    await tap('[data-act=sec][data-id=survival]'); await tap('[data-act=start][data-set="Water"]'); const wa = await page.evaluate(() => MG.UI.state().session.q.answer); await tap('[data-act=pick][data-i="' + wa + '"]');
+    await tap('[data-act=sec][data-id=survival]'); await tap('[data-act=start][data-set="Water Treatment"]'); const wa = await page.evaluate(() => MG.UI.state().session.q.answer); await tap('[data-act=pick][data-i="' + wa + '"]');
     assert(/Safety level:/.test(await page.textContent('#fb'))); if (vp.name === 'landscape') { const top = await page.evaluate(() => document.getElementById('fb').getBoundingClientRect().top); assert(top < 100, 'landscape scrolls to feedback ' + top); }
     await shot('fix-3-water-level.jpg'); await tap('[data-act=deck].back'); await tap('[data-act=home]'); ok(vp.name + ' M-4 Bible records, M-5 water levels, p-1 landscape scroll');
     // M-7 vocab meaning once

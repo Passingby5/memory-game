@@ -53,7 +53,7 @@ Herbs
 24. Each Dr. Jones herb links to the formula or tincture page it comes from plus at least one independent monograph; 8 combo formulas listed with links; unsafe ingredients (lobelia, Brigham tea, bugleweed) marked left out.
 
 History
-25. At least 50 cards total, 8+ per region set (North America, China, Europe, Middle East, Vietnam) and a Bible timeline set; each card has a date and at least one credible source.
+25. At least 300 cards total, 50+ per region set (North America, China, Europe, Middle East, Vietnam) and a Bible timeline set; each card has a date and at least one credible source.
 26. Vietnam cards cover all six eras listed above; neighbor history appears only where it affected Vietnam.
 27. No graphic gore; brutality described in plain factual terms.
 28. Bible timeline marks which points have outside records (example: Tel Dan stele, Cyrus Cylinder, Pilate stone) and which do not.
@@ -79,19 +79,23 @@ GRE Vocab
 - Sources checked by HTTP 200 on Oct 20, 2026: mskcc.org About Herbs pages and nccih.nih.gov fact sheets.
 - Dropped on purpose: ephedra, aristolochia, comfrey by mouth, unprocessed butterbur, kava.
 
-## Status (v9, Oct 20, 2026)
+## Status (v10, Oct 27, 2026)
 | Section | Cards | Checklist items | Status |
 |---|---|---|---|
-| Shell | n/a | 1 to 15 | Done (10: network-first SW built; reload path not browser-tested) |
-| Herbs | 49 (30 Dr. Jones, 19 more Chinese), 8 formulas, 8 left out | 16 to 24 | Done |
-| History | 72 | 25 to 28 | Done |
-| Memory Trainers | 4 trainers + 14 research cards | 29 to 30 | Done |
-| Survival Science | 64 | 31 to 33a | Done |
-| Truth or Lies | 52 | 34 | Done |
-| GRE Vocab | 64 | 35 to 36 | Done |
+| Shell | n/a | 1 to 15 | Done |
+| Herbs | 61 (30 Dr. Jones, 19 Chinese, 12 common kitchen/tea herbs), 8 formulas, 8 left out | 16 to 24 | Done |
+| History | 306 (50+ per region: North America, China, Europe, Middle East, Vietnam, Bible Timeline) | 25 to 28 | Done |
+| Memory Trainers | 4 trainers + 52 research cards (11 methods) | 29 to 30 | Done |
+| Survival Science | 213 in 13 topics (15+ each) | 31 to 33a | Done |
+| Truth or Lies | 259 (5x per category) | 34 | Done |
+| GRE Vocab | 222 (English sentence + Vietnamese) | 35 to 36 | Done |
+
+No-wiki rule (Tom, Oct 27): Wikipedia and every wiki mirror are banned. tools/checkdecks.js and tests/unit.js fail on any wiki URL; tools/linkcheck.js refuses them. Contested history and social topics also cite one right-leaning (Heritage Foundation) and one left-leaning (Brookings) source next to the neutral record.
+Answer positions: choices are shuffled at run time with a seeded RNG (mixed seeds); the checker fails if any deck or set strays outside 28 to 39% per slot, or if the stored (no-RNG) slot of any 30+ card set passes 45%. Sessions shuffle question order every time while missed (box 1) cards still come first.
+History, Survival and Truth cards are generated from tools/content/*.txt by tools/gendeck.py.
 
 Answer-tell checker (tools/checkdecks.js): longest, shortest, middle length, first position, most words, repeated first word, absolute words (always, never, only, all, none), Yes-or-negation openings, and question words that show up only in the right answer (herb clues: any word of the right name); every rule at or under 45% for every deck.
-Link checker (tools/linkcheck.js): every source URL verified (Wikipedia and Wiktionary via the MediaWiki API, others with HTTP GET; homegrownherbalist.net blocks the box and was verified by page fetch).
+Link checker (tools/linkcheck.js): every source URL verified (HTTP GET; bot-walled sites such as Britannica, CDC and Heritage in a real Chrome window by page title and status; Cambridge by headword; vdict by entry; doi.org through the Crossref API; homegrownherbalist.net blocks the box and was verified by page fetch). Oct 27, 2026: 1276 links, 0 bad, 0 wiki.
 
 Herb safety (v8, per Tom): no per-card pregnancy text; avoiding herbs in pregnancy is treated as a given for this family. Specific warnings kept: St. John's wort (see a doctor for depression, drug interactions), Circulatory Support (do not stop prescribed blood pressure medicine), Asian ginseng (not for children).
 Tests: `npm test` writes its single-file copy to tmp/test-copy.html. `npm run testcopy` writes /workspace/memory-game-test.html.

@@ -21,7 +21,7 @@ const browserList = [];
 todo.forEach(u => { if (BROWSER.test(u)) return browserList.push(u); let c = '000';
   try { if (/dictionary\.cambridge\.org/.test(u)) { const w = decodeURIComponent(u.split('/').pop()).toLowerCase(), h = curl([u]).toLowerCase(); c = h.includes('class="hw dhw">' + w) || h.includes('<span class="hw dhw">' + w) ? 200 : 'NO-HEADWORD'; }
     else if (/nchfp\.uga\.edu/.test(u)) { const h = curl([u]); c = /<title>\s*\|/.test(h) || !/<title>/.test(h) ? 'NO-PAGE' : 200; }
-    else if (/^https:\/\/doi\.org\//.test(u)) { const j = JSON.parse(curl(['https://api.crossref.org/works/' + u.slice(16)]) || '{}'); c = j.status === 'ok' && j.message && j.message.title ? 200 : 'NO-DOI'; }
+    else if (/^https:\/\/doi\.org\//.test(u)) { const j = JSON.parse(execFileSync('curl', ['-s', '-m', '25', 'https://api.crossref.org/works/' + u.slice(16)]).toString() || '{}'); c = j.status === 'ok' && j.message && j.message.title ? 200 : 'NO-DOI'; }
     else if (/vdict\.com/.test(u)) { const h = curl([u]); c = (h.match(/meaning/g) || []).length >= 3 ? 200 : 'NO-ENTRY'; }
     else c = +curl(['-o', '/dev/null', '-w', '%{http_code}', u]) || 'ERR'; } catch (e) { c = 'ERR'; }
   if (c !== 200 && c !== 'NO-HEADWORD' && c !== 'NO-ENTRY' && c !== 'NO-PAGE' && c !== 'NO-DOI') browserList.push(u); else out[u] = c; });
