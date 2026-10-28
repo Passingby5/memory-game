@@ -32,7 +32,7 @@ var C = [
 MG.decks.history = { id: 'history', title: 'History', min: 300, note: 'Real events of the last 1,000 years, told plainly without gore. Each card links to its sources (Britannica, national archives, the State Department historian, museums). No Wikipedia.',
   sets: SETS,
   setNotes: { 'Vietnam': 'Vietnam itself, and how its neighbors shaped it: Chinese rule and wars with China, the Mongols, Champa and Siam, French colonial rule, Japan in World War II, the US war, the Khmer Rouge, the 1979 war with China, and Doi Moi.', 'Bible Timeline': 'Places where Bible accounts line up with records found outside the Bible, and later empires (Roman, Muslim caliphs, Crusaders, Ottoman, French, Russian, British) in the Holy Land.' },
-  cards: C.map(function (a, i) { var c = { id: 'h' + (i + 1), set: a[0], q: a[1], a: a[2], w: [a[3], a[4]], why: a[5], src: a[6] }; if (a[7]) { c.record = a[7]; c.dates = a[8]; } return c; }) };
+  cards: C.map(function (b) { var id = b[0], a = b.slice(1), c = { id: 'h' + id, set: a[0], q: a[1], a: a[2], w: [a[3], a[4]], why: a[5], src: a[6] }; if (a[7]) { c.record = a[7]; c.dates = a[8]; } return c; }) };
 })();
 if (typeof module !== 'undefined') module.exports = MG;
 """),
@@ -49,7 +49,7 @@ var C = [
 MG.decks.survival = { id: 'survival', title: 'Survival Science', min: 200, note: 'Practical chemistry, physics and engineering for daily life and rebuilding a town, from methods used worldwide. Safety levels are honest. Dangerous reactions are taught only as recognize and avoid.',
   sets: SETS,
   setNotes: { 'Water Treatment': 'Honest safety levels: settling and alum or moringa only clear water. Filters reduce germs. Boiling, chlorine or full SODIS disinfect. No home method removes chemical pollution.' },
-  cards: C.map(function (a, i) { var c = { id: 's' + (i + 1), set: a[0], q: a[1], a: a[2], w: [a[3], a[4]], why: a[5], src: a[6] }; if (a[7]) c.level = a[7]; return c; }) };
+  cards: C.map(function (b) { var a = b.slice(1), c = { id: 's' + b[0], set: a[0], q: a[1], a: a[2], w: [a[3], a[4]], why: a[5], src: a[6] }; if (a[7]) c.level = a[7]; return c; }) };
 })();
 if (typeof module !== 'undefined') module.exports = MG;
 """),
@@ -63,7 +63,7 @@ var C = [
 ];
 MG.decks.truth = { id: 'truth', title: 'Truth or Lies', min: 250, note: 'Things many people believe, and what the facts show. Pick the true answer.',
   sets: ['Science', 'Body', 'Health', 'Animals', 'History', 'Earth', 'Space', 'Food', 'Books'],
-  cards: C.map(function (a, i) { return { id: 't' + (i + 1), set: a[0], q: a[1], a: a[2], w: [a[3], a[4]], why: a[5], src: a[6] }; }) };
+  cards: C.map(function (b) { var a = b.slice(1); return { id: 't' + b[0], set: a[0], q: a[1], a: a[2], w: [a[3], a[4]], why: a[5], src: a[6] }; }) };
 })();
 if (typeof module !== 'undefined') module.exports = MG;
 """),
@@ -76,6 +76,14 @@ def build(name):
     sets = []
     for r in rows:
         if r[0] not in sets: sets.append(r[0])
+    # Stable card ids (v11): tools/content/ids.json maps question text -> id number, so adding or removing cards never renumbers
+    # others and saved progress stays on the same question. New questions get the next unused number. Reworded questions: edit the key.
+    idf = os.path.join(D, 'content', 'ids.json'); ids = json.load(open(idf)) if os.path.exists(idf) else {}
+    m = ids.setdefault(name, {}); nxt = max([0] + list(m.values())) + 1
+    for r in rows:
+        if r[1] not in m: m[r[1]] = nxt; nxt += 1
+        r.insert(0, m[r[1]])
+    json.dump(ids, open(idf, 'w'), ensure_ascii=False, indent=0, sort_keys=True)
     body = ',\n'.join(json.dumps(r, ensure_ascii=False) for r in rows)
     open(os.path.join(D, '..', 'src', 'decks', name + '.js'), 'w', encoding='utf8').write(head + body + tail.replace('SETS', json.dumps(sets)))
     print(name, len(rows))

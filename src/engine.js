@@ -2,7 +2,7 @@
 var MG = typeof MG !== 'undefined' ? MG : {};
 (function () {
   var E = MG.E = {};
-  E.SAVE_VERSION = 2; E.SAVE_KEY = 'mg_save';
+  E.SAVE_VERSION = 3; E.SAVE_KEY = 'mg_save';
   // Seeds are mixed (murmur3 finalizer) and the first outputs dropped, so nearby seeds (12345, 12346...) do not give
   // nearly the same first numbers. Before v10 they did, which put the right answer in the same slot again and again.
   E.mix = function (h) { h = (h >>> 0) ^ 0x9e3779b9; h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) || 1; };
@@ -27,6 +27,13 @@ var MG = typeof MG !== 'undefined' ? MG : {};
     var s; try { s = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { return E.newState(); }
     if (!s || typeof s !== 'object' || Array.isArray(s)) return E.newState();
     if (s.v === 1) { var n = E.newState(); Object.keys(s.leitner || {}).forEach(function (k) { n.boxes[k] = { box: s.leitner[k], due: 0 }; }); n.stats = s.stats || n.stats; return E.sanitize(n, decks); }
+    // v2 saves come from v9 or v10. v9 seeds started at 12345 and count up by one per session; v10 seeds are random 32-bit numbers.
+    // v9 card ids moved in v10, so v9 boxes are remapped with MG.V9IDS (old id -> new id). v10 ids are kept as is (v11 ids are stable).
+    // The unfinished session of a migrated v9 save is dropped (its question list is from the old numbering); boxes, stats and bests stay.
+    if (s.v === 2 && !(typeof s.seed === 'number' && s.seed < 1e6)) { var o3 = E.sanitize(s, decks); o3.v = E.SAVE_VERSION; return o3; }
+    if (s.v === 2) { var fromV9 = typeof s.seed === 'number' && s.seed < 1e6, map = (typeof MG !== 'undefined' && MG.V9IDS) || {}, nb = {};
+      if (s.boxes && typeof s.boxes === 'object') Object.keys(s.boxes).forEach(function (k) { var to = fromV9 ? map[k] : k; if (to) nb[to] = s.boxes[k]; });
+      var o2 = E.sanitize({ seed: fromV9 ? E.freshSeed() : s.seed, stats: s.stats, boxes: nb, best: s.best }, decks); o2.migratedFrom = fromV9 ? 'v9' : 'v10'; return o2; }
     if (s.v !== E.SAVE_VERSION) return E.newState();
     return E.sanitize(s, decks);
   };
