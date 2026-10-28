@@ -1,4 +1,4 @@
-// History deck data only. Generated from tools/content/h_*.txt by tools/gendeck.py (edit the text files, then regenerate).
+// History deck data only. Generated from tools/content/h_*.txt by tools/gendeck.py (edit the text files, then run: python3 tools/gendeck.py).
 // Each card: [set, question, answer, wrong1, wrong2, why, [source URLs], record, dates]. record and dates only for the Bible Timeline set.
 // Sources: Encyclopaedia Britannica, US National Archives, US State Department Office of the Historian, Library of Congress, UNESCO,
 // US Holocaust Memorial Museum, British Museum, British Library, Yale Avalon Project and others. No Wikipedia or wiki mirrors.
@@ -314,7 +314,7 @@ var C = [
 ["Bible Timeline", "The Elephantine papyri (400s BC) from Egypt name which governor of Samaria, an opponent in Nehemiah?", "Sanballat", "Nebuchadnezzar", "Ezra", "A letter of 407 BC mentions the sons of Sanballat, governor of Samaria.", ["https://www.britannica.com/topic/Elephantine-papyri"], "Outside record: Elephantine papyri", "Date: 407 BC."]
 ];
 MG.decks.history = { id: 'history', title: 'History', min: 300, note: 'Real events of the last 1,000 years, told plainly without gore. Each card links to its sources (Britannica, national archives, the State Department historian, museums). No Wikipedia.',
-  sets: ['North America', 'China', 'Europe', 'Middle East', 'Vietnam', 'Bible Timeline'],
+  sets: ["North America", "China", "Europe", "Middle East", "Vietnam", "Bible Timeline"],
   setNotes: { 'Vietnam': 'Vietnam itself, and how its neighbors shaped it: Chinese rule and wars with China, the Mongols, Champa and Siam, French colonial rule, Japan in World War II, the US war, the Khmer Rouge, the 1979 war with China, and Doi Moi.', 'Bible Timeline': 'Places where Bible accounts line up with records found outside the Bible, and later empires (Roman, Muslim caliphs, Crusaders, Ottoman, French, Russian, British) in the Holy Land.' },
   cards: C.map(function (a, i) { var c = { id: 'h' + (i + 1), set: a[0], q: a[1], a: a[2], w: [a[3], a[4]], why: a[5], src: a[6] }; if (a[7]) { c.record = a[7]; c.dates = a[8]; } return c; }) };
 })();

@@ -11,7 +11,7 @@ const WIKI = exports.WIKI = /wikipedia|wikimedia|wiktionary|wikiwand|wikidata|wi
 if (require.main !== module) return;
 const urls = new Set(); Object.values(ctx.MG.decks).forEach(d => { (d.cards || []).forEach(c => (c.src || []).forEach(u => urls.add(u))); (d.formulas || []).forEach(f => urls.add(f.url)); (d.dropped || []).forEach(x => urls.add(x.src)); (d.sources || []).forEach(s => urls.add(s[1])); });
 (ctx.MG.herbSources || []).forEach(s => urls.add(s[1]));
-const MANUAL = /^https:\/\/homegrownherbalist\.net\//, BROWSER = /britannica\.com|merriam-webster\.com|cdc\.gov|collinsdictionary|etymonline|nih\.gov|nature\.com|science\.org|sciencedirect|jstor|wsj\.com|nytimes\.com|heritage\.org|cfr\.org/;
+const MANUAL = /^https:\/\/homegrownherbalist\.net\//, BROWSER = /britannica\.com|merriam-webster\.com|cdc\.gov|collinsdictionary|etymonline|nature\.com|science\.org|sciencedirect|jstor|wsj\.com|nytimes\.com|heritage\.org|cfr\.org/;
 const file = path.join(__dirname, 'verified-links.json'), prev = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file)) : {}, out = {}, recheck = process.argv.includes('--recheck');
 const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const curl = args => execFileSync('curl', ['-s', '-m', '25', '-L', '-A', UA, '-H', 'Accept: text/html', '-H', 'Accept-Language: en-US'].concat(args), { maxBuffer: 64e6 }).toString();
@@ -20,15 +20,19 @@ const todo = [];
 const browserList = [];
 todo.forEach(u => { if (BROWSER.test(u)) return browserList.push(u); let c = '000';
   try { if (/dictionary\.cambridge\.org/.test(u)) { const w = decodeURIComponent(u.split('/').pop()).toLowerCase(), h = curl([u]).toLowerCase(); c = h.includes('class="hw dhw">' + w) || h.includes('<span class="hw dhw">' + w) ? 200 : 'NO-HEADWORD'; }
+    else if (/nchfp\.uga\.edu/.test(u)) { const h = curl([u]); c = /<title>\s*\|/.test(h) || !/<title>/.test(h) ? 'NO-PAGE' : 200; }
     else if (/vdict\.com/.test(u)) { const h = curl([u]); c = (h.match(/meaning/g) || []).length >= 3 ? 200 : 'NO-ENTRY'; }
     else c = +curl(['-o', '/dev/null', '-w', '%{http_code}', u]) || 'ERR'; } catch (e) { c = 'ERR'; }
-  if (c !== 200 && c !== 'NO-HEADWORD' && c !== 'NO-ENTRY') browserList.push(u); else out[u] = c; });
+  if (c !== 200 && c !== 'NO-HEADWORD' && c !== 'NO-ENTRY' && c !== 'NO-PAGE') browserList.push(u); else out[u] = c; });
 const done = () => { fs.writeFileSync(file, JSON.stringify(out, null, 1)); const bad = Object.entries(out).filter(([u, c]) => c !== 200 && c !== 'manual-200'); console.log('links', Object.keys(out).length, 'bad', bad.length); bad.forEach(b => console.log(b[1], b[0])); };
 if (!browserList.length) return done();
 (async () => { const { chromium } = require('playwright-core'); const exe = ['/usr/bin/google-chrome', '/usr/bin/chromium'].find(f => fs.existsSync(f));
-  const b = await chromium.launch({ executablePath: exe, headless: false, args: ['--no-sandbox', '--disable-blink-features=AutomationControlled'] }); const p = await b.newPage();
-  for (const u of browserList) { let c = 'ERR'; try { const r = await p.goto(u, { waitUntil: 'domcontentloaded', timeout: 40000 }); let t = await p.title();
-      for (let k = 0; k < 10 && /just a moment|attention required/i.test(t); k++) { await p.waitForTimeout(1500); t = await p.title(); }
-      const st = r ? r.status() : 0; c = /just a moment|error|not found|404|page unavailable|attention required/i.test(t) || (st >= 400 && st !== 403) ? 'BAD:' + st + ':' + t.slice(0, 40) : 200; } catch (e) { c = 'ERR'; }
+  const b = await chromium.launch({ executablePath: exe, headless: false, args: ['--no-sandbox', '--disable-blink-features=AutomationControlled'] }); 
+  let p = await b.newPage();
+  for (const u of browserList) { let c = 'ERR';
+    for (let attempt = 0; attempt < 2 && c === 'ERR'; attempt++) { try { const r = await p.goto(u, { waitUntil: 'domcontentloaded', timeout: 45000 }); let t = await p.title();
+      for (let k = 0; k < 12 && /just a moment|attention required/i.test(t); k++) { await p.waitForTimeout(1500); t = await p.title(); }
+      const st = r ? r.status() : 0, bad = /^(just a moment|attention required|error|page not found|404)|page not found|^error \|/i.test(t.trim());
+      c = bad || st === 404 || st === 410 || st >= 500 ? 'BAD:' + st + ':' + t.slice(0, 40) : 200; } catch (e) { try { await p.close(); } catch (x) {} p = await b.newPage(); } }
     out[u] = c; process.stdout.write(c === 200 ? '.' : 'x'); }
   await b.close(); console.log(); done(); })();
