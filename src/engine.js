@@ -65,7 +65,7 @@ var MG = typeof MG !== 'undefined' ? MG : {};
   // Generic multiple choice card {q, a, w:[2]}: choices are the answer plus two wrong answers, shuffled by the seeded RNG.
   E.mcq = function (card, r) { var ch; if (r) ch = E.shuffle([card.a].concat(card.w), r); else { ch = card.w.slice(); ch.splice(E.slot(card.id), 0, card.a); } return { kind: 'mcq', id: card.id, prompt: card.q, choices: ch, answer: ch.indexOf(card.a) }; };
   // Stored (no-RNG) answer slot, from a hash of the card id, so stored order is balanced too (about a third each).
-  E.slot = function (id) { var h = 7; for (var i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619); return E.mix(h) % 3; };
+  E.slot = function (id) { var m = /(\d+)$/.exec(id); if (m) return +m[1] % 3; var h = 7; for (var i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619); return E.mix(h) % 3; };
   // Trainers. Digit span: random digits; length goes up after a right answer, down after a wrong one (minimum 3).
   E.digits = function (r, n) { var s = ''; for (var i = 0; i < n; i++) s += Math.floor(r() * 10); return s; };
   E.spanNext = function (len, ok) { return ok ? len + 1 : Math.max(3, len - 1); };
