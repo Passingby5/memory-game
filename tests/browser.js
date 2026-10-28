@@ -44,7 +44,7 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
     await tap('[data-act=start][data-set="Vietnam"]'); await layout('history quiz');
     let hs = await page.evaluate(() => MG.UI.state().session); assert.strictEqual(hs.deck, 'history');
     assert(hs.ids.every(id => true)); const hset = await page.evaluate(ids => ids.map(id => MG.decks.history.cards.find(c => c.id === id).set), hs.ids); assert(hset.every(x => x === 'Vietnam'));
-    await tap('[data-act=pick][data-i="' + hs.q.answer + '"]'); assert(/Right/.test(await page.textContent('#fb h2'))); assert(/wikipedia/.test(await page.textContent('#fb'))); await layout('history feedback'); await shot('history-2-answer.jpg');
+    await tap('[data-act=pick][data-i="' + hs.q.answer + '"]'); assert(/Right/.test(await page.textContent('#fb h2'))); assert(/britannica|archives\.gov|state\.gov|https:/.test(await page.innerHTML('#fb'))); assert(!/wiki/i.test(await page.innerHTML('#fb'))); await layout('history feedback'); await shot('history-2-answer.jpg');
     ok(vp.name + ' history Vietnam set practice with sources');
     await tap('[data-act=deck][data-id=history]'); await tap('[data-act=cards]'); assert(/Tel Dan/.test(await page.textContent('#app'))); await layout('history cards'); await shot('history-3-cards.jpg'); await tap('[data-act=deck].back'); await tap('[data-act=home]');
     ok(vp.name + ' history browse cards');
@@ -52,7 +52,7 @@ let passed = 0; const ok = m => { passed++; console.log('ok', m); };
     for (const dk of ['survival', 'truth', 'vocab']) { if (!(await page.evaluate(k => !!MG.decks[k], dk))) continue;
       if (await page.locator('[data-act=home]').count()) await tap('[data-act=home]'); await tap('[data-act=sec][data-id=' + dk + ']'); await layout(dk + ' menu'); await shot(dk + '-1-menu.jpg');
       await tap('[data-act=start][data-deck=' + dk + ']'); const a2 = await page.evaluate(() => MG.UI.state().session.q.answer); await tap('[data-act=pick][data-i="' + a2 + '"]');
-      assert(/Right/.test(await page.textContent('#fb h2'))); if (dk === 'vocab') { const fl = await page.textContent('#filled'), want = await page.evaluate(() => { const s = MG.UI.state().session; return MG.decks.vocab.cards.find(c => c.id === s.q.id); }); assert(fl.includes(want.a) && !fl.includes('____')); assert((await page.textContent('#fb')).includes(want.vi)); } assert(/(wikipedia|wiktionary)/.test(await page.textContent('#fb'))); await layout(dk + ' feedback'); await shot(dk + '-2-answer.jpg');
+      assert(/Right/.test(await page.textContent('#fb h2'))); if (dk === 'vocab') { const fl = await page.textContent('#filled'), want = await page.evaluate(() => { const s = MG.UI.state().session; return MG.decks.vocab.cards.find(c => c.id === s.q.id); }); assert(fl.includes(want.a) && !fl.includes('____')); assert((await page.textContent('#fb')).includes(want.vi)); } assert(/https:/.test(await page.innerHTML('#fb'))); assert(!/wiki/i.test(await page.innerHTML('#fb'))); await layout(dk + ' feedback'); await shot(dk + '-2-answer.jpg');
       await tap('[data-act=deck].back'); await tap('[data-act=cards]'); await layout(dk + ' cards'); await tap('[data-act=deck].back'); await tap('[data-act=home]'); ok(vp.name + ' ' + dk + ' deck practice, sources, browse'); }
     // B-1 herb card St John's wort doctor line; Circulatory Support med warning
     await tap('[data-act=sec][data-id=herbs]'); await tap('[data-act=browse]'); await tap('[data-act=herb][data-id=stjohnswort]');

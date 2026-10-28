@@ -44,7 +44,7 @@ Food|Is white chocolate real chocolate?|It has cocoa butter but no cocoa solids|
 Food|Is peanut butter a good source of protein?|Yes, a fair one|No, it has none|It is pure fat|Two tablespoons have about 7 to 8 grams of protein.|B:plant/peanut
 Food|Do eggs need to be refrigerated in the US?|Yes, US eggs are washed|No, never in any country|Only brown ones|US eggs are washed, which removes a protective coating, so keep them cold.|https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/eggs/shell-eggs-farm-table
 Food|Are potatoes from the Americas?|Yes, from the Andes|No, from Ireland in the 1700s|No, from Russia|People in Peru and Bolivia grew them thousands of years before Europe.|B:plant/potato
-Food|Is "five-second rule" food safe?|Germs transfer in under a second|Yes, if picked up within five seconds|Only on carpet|A 2016 Rutgers study found bacteria moved almost at once, more on wet foods.|https://pubmed.ncbi.nlm.nih.gov/27590364/
+Food|Is "five-second rule" food safe?|Germs transfer in under a second|Yes, if picked up within five seconds|Only on carpet|A 2016 Rutgers study found bacteria moved almost at once, more on wet foods.|https://pubmed.ncbi.nlm.nih.gov/27590818/
 Food|Is coffee made from beans?|From seeds of a fruit|From true beans like peas|From nuts|Coffee "beans" are seeds inside red coffee cherries.|B:topic/coffee
 Food|Does eating carrots turn skin orange?|Very large amounts can|No, never, in any amount|Only in children|Too much beta-carotene can tint skin; it fades when you eat less.|B:plant/carrot
 Food|Is spinach extra high in iron as Popeye claimed?|It has some, but less than claimed|The highest of all|It has no iron|Spinach has a fair amount of iron, but oxalates block much of it.|B:plant/spinach
