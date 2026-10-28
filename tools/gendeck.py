@@ -53,6 +53,20 @@ MG.decks.survival = { id: 'survival', title: 'Survival Science', min: 200, note:
 })();
 if (typeof module !== 'undefined') module.exports = MG;
 """),
+'truth': (['t_sci','t_body','t_ani','t_hist','t_misc'], """// Truth or Lies deck data only. Popular beliefs vs. the fact-based answer. Generated from tools/content/t_*.txt by tools/gendeck.py.
+// [topic, question, true answer, myth1, myth2, why, [sources]]. Sources: Britannica, NASA, NOAA, USGS, CDC, FDA, USDA, NIH/PubMed studies,
+// National Park Service, Smithsonian, Library of Congress, National Archives, Mayo Clinic and others. No Wikipedia or wiki mirrors.
+var MG = typeof MG !== 'undefined' ? MG : {}; MG.decks = MG.decks || {};
+(function () {
+var C = [
+""", """
+];
+MG.decks.truth = { id: 'truth', title: 'Truth or Lies', min: 250, note: 'Things many people believe, and what the facts show. Pick the true answer.',
+  sets: ['Science', 'Body', 'Health', 'Animals', 'History', 'Earth', 'Space', 'Food', 'Books'],
+  cards: C.map(function (a, i) { return { id: 't' + (i + 1), set: a[0], q: a[1], a: a[2], w: [a[3], a[4]], why: a[5], src: a[6] }; }) };
+})();
+if (typeof module !== 'undefined') module.exports = MG;
+"""),
 }
 import os
 D = os.path.dirname(os.path.abspath(__file__))
