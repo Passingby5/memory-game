@@ -79,15 +79,15 @@ GRE Vocab
 - Sources checked by HTTP 200 on Oct 20, 2026: mskcc.org About Herbs pages and nccih.nih.gov fact sheets.
 - Dropped on purpose: ephedra, aristolochia, comfrey by mouth, unprocessed butterbur, kava.
 
-## Status (v10, Oct 27, 2026)
+## Status (v11, Oct 27, 2026)
 | Section | Cards | Checklist items | Status |
 |---|---|---|---|
 | Shell | n/a | 1 to 15 | Done |
 | Herbs | 61 (30 Dr. Jones, 19 Chinese, 12 common kitchen/tea herbs), 8 formulas, 8 left out | 16 to 24 | Done |
-| History | 306 (50+ per region: North America, China, Europe, Middle East, Vietnam, Bible Timeline) | 25 to 28 | Done |
-| Memory Trainers | 4 trainers + 52 research cards (11 methods) | 29 to 30 | Done |
+| History | 312 (50+ per region, all dated 1026 or later except Bible Timeline: North America 51, China 51, Europe 52, Middle East 50, Vietnam 51, Bible Timeline 57) | 25 to 28 | Done |
+| Memory Trainers | 4 trainers + 65 research cards (11 methods; Digit span, Memory palace, N-back 9 each) | 29 to 30 | Done |
 | Survival Science | 213 in 13 topics (15+ each) | 31 to 33a | Done |
-| Truth or Lies | 259 (5x per category) | 34 | Done |
+| Truth or Lies | 279 (25+ in every category) | 34 | Done |
 | GRE Vocab | 222 (English sentence + Vietnamese) | 35 to 36 | Done |
 
 No-wiki rule (Tom, Oct 27): Wikipedia and every wiki mirror are banned. tools/checkdecks.js and tests/unit.js fail on any wiki URL; tools/linkcheck.js refuses them. Contested history and social topics also cite one right-leaning (Heritage Foundation) and one left-leaning (Brookings) source next to the neutral record.
@@ -95,7 +95,9 @@ Answer positions: choices are shuffled at run time with a seeded RNG (mixed seed
 History, Survival and Truth cards are generated from tools/content/*.txt by tools/gendeck.py.
 
 Answer-tell checker (tools/checkdecks.js): longest, shortest, middle length, first position, most words, repeated first word, absolute words (always, never, only, all, none), Yes-or-negation openings, and question words that show up only in the right answer (herb clues: any word of the right name); every rule at or under 45% for every deck.
-Link checker (tools/linkcheck.js): every source URL verified (HTTP GET; bot-walled sites such as Britannica, CDC and Heritage in a real Chrome window by page title and status; Cambridge by headword; vdict by entry; doi.org through the Crossref API; homegrownherbalist.net blocks the box and was verified by page fetch). Oct 27, 2026: 1276 links, 0 bad, 0 wiki.
+Link checker (tools/linkcheck.js): every source URL verified (HTTP GET; bot-walled sites such as Britannica, CDC and Heritage in a real Chrome window by page title and status; Cambridge by headword; vdict by entry; doi.org through the Crossref API; homegrownherbalist.net blocks the box and was verified by page fetch). Oct 27, 2026 (v11): every deck checked, 0 bad, 0 wiki.
+Save format v3: v9 saves (v2 with seed under 1,000,000) are remapped through src/idmap.js (old id to new id); v10 saves keep their ids. Card ids are stable from v10 on (tools/content/ids.json; new memory cards are appended at the end).
+Source labels: every deck shows a short label (site name plus the end of the link); the full link is in the href.
 
 Herb safety (v8, per Tom): no per-card pregnancy text; avoiding herbs in pregnancy is treated as a given for this family. Specific warnings kept: St. John's wort (see a doctor for depression, drug interactions), Circulatory Support (do not stop prescribed blood pressure medicine), Asian ginseng (not for children).
 Tests: `npm test` writes its single-file copy to tmp/test-copy.html. `npm run testcopy` writes /workspace/memory-game-test.html.
