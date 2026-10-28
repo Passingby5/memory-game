@@ -1,20 +1,33 @@
-// Checks every source URL in all decks. Wikipedia titles are checked in batches with the MediaWiki API (exists, not a missing page);
-// other URLs with a GET (HTTP 200). homegrownherbalist.net blocks the box (403) and was checked by page fetch; listed in MANUAL.
-// Writes tools/verified-links.json, which the deck checker requires every card URL to appear in.
+// Checks every source URL in all decks and writes tools/verified-links.json (the deck checker requires each card URL there).
+// Wikipedia and every wiki mirror are refused outright (Tom, Oct 27). Plain GET with curl first (HTTP 200).
+// Sites behind a bot wall (Britannica, Merriam-Webster, CDC...) are opened in a real Chrome window (DISPLAY) and pass only when
+// the page title is a real article, not a challenge or error page. Cambridge returns 200 for unknown words, so its pages must
+// contain the headword. homegrownherbalist.net blocks the box and was checked by page fetch (MANUAL).
+// Usage: node tools/linkcheck.js [--recheck]   (without --recheck, URLs already verified 200 are kept).
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const vm = require('vm'); const ctx = {}; vm.createContext(ctx);
 require('../tests/load.js').ORDER.forEach(f => vm.runInContext(fs.readFileSync(path.join(__dirname, '../src', f), 'utf8'), ctx));
+const WIKI = exports.WIKI = /wikipedia|wikimedia|wiktionary|wikiwand|wikidata|wikibooks|wikisource|wikivoyage|newworldencyclopedia|fandom\.com|\/wiki\//i;
+if (require.main !== module) return;
 const urls = new Set(); Object.values(ctx.MG.decks).forEach(d => { (d.cards || []).forEach(c => (c.src || []).forEach(u => urls.add(u))); (d.formulas || []).forEach(f => urls.add(f.url)); (d.dropped || []).forEach(x => urls.add(x.src)); (d.sources || []).forEach(s => urls.add(s[1])); });
 (ctx.MG.herbSources || []).forEach(s => urls.add(s[1]));
-const MANUAL = /^https:\/\/homegrownherbalist\.net\//;
-const out = {}, wiki = {}; const file = path.join(__dirname, 'verified-links.json'); const prev = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file)) : {};
-[...urls].forEach(u => { const m = u.match(/^https:\/\/(en|vi)\.(wikipedia|wiktionary)\.org\/wiki\/(.+)$/); if (m) (wiki[m[1] + '.' + m[2]] = wiki[m[1] + '.' + m[2]] || []).push([u, decodeURIComponent(m[3])]); });
-const curl = args => execFileSync('curl', ['-s', '-m', '25', '-A', 'MemoryGameLinkCheck/1.0 (family app)'].concat(args)).toString();
-Object.entries(wiki).forEach(([host, list]) => { for (let i = 0; i < list.length; i += 40) { const part = list.slice(i, i + 40);
-  const j = JSON.parse(curl(['https://' + host + '.org/w/api.php?action=query&format=json&redirects=1&titles=' + encodeURIComponent(part.map(p => p[1].replace(/_/g, ' ')).join('|'))]));
-  const missing = new Set(Object.values(j.query.pages).filter(p => 'missing' in p || 'invalid' in p).map(p => p.title));
-  const norm = {}; (j.query.normalized || []).forEach(n => norm[n.from] = n.to); const red = {}; (j.query.redirects || []).forEach(n => red[n.from] = n.to);
-  part.forEach(([u, t]) => { let x = t.replace(/_/g, ' '); x = norm[x] || x; out[u] = missing.has(x) ? 'MISSING' : 200; }); } });
-[...urls].filter(u => !(u in out)).forEach(u => { if (MANUAL.test(u)) { out[u] = 'manual-200'; return; } if (prev[u] === 200) { out[u] = 200; return; } let c = '000'; try { c = curl(['-o', '/dev/null', '-w', '%{http_code}', '-L', u]); } catch (e) { } out[u] = +c || c; });
-fs.writeFileSync(file, JSON.stringify(out, null, 1));
-const bad = Object.entries(out).filter(([u, c]) => c !== 200 && c !== 'manual-200'); console.log('links', Object.keys(out).length, 'bad', bad.length); bad.forEach(b => console.log(b[1], b[0]));
+const MANUAL = /^https:\/\/homegrownherbalist\.net\//, BROWSER = /britannica\.com|merriam-webster\.com|cdc\.gov|collinsdictionary|etymonline|nih\.gov|nature\.com|science\.org|sciencedirect|jstor|wsj\.com|nytimes\.com|heritage\.org|cfr\.org/;
+const file = path.join(__dirname, 'verified-links.json'), prev = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file)) : {}, out = {}, recheck = process.argv.includes('--recheck');
+const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
+const curl = args => execFileSync('curl', ['-s', '-m', '25', '-L', '-A', UA, '-H', 'Accept: text/html', '-H', 'Accept-Language: en-US'].concat(args), { maxBuffer: 64e6 }).toString();
+const todo = [];
+[...urls].forEach(u => { if (WIKI.test(u)) { out[u] = 'WIKI-REFUSED'; return; } if (MANUAL.test(u)) { out[u] = 'manual-200'; return; } if (!recheck && prev[u] === 200) { out[u] = 200; return; } todo.push(u); });
+const browserList = [];
+todo.forEach(u => { if (BROWSER.test(u)) return browserList.push(u); let c = '000';
+  try { if (/dictionary\.cambridge\.org/.test(u)) { const w = decodeURIComponent(u.split('/').pop()).toLowerCase(), h = curl([u]).toLowerCase(); c = h.includes('class="hw dhw">' + w) || h.includes('<span class="hw dhw">' + w) ? 200 : 'NO-HEADWORD'; }
+    else c = +curl(['-o', '/dev/null', '-w', '%{http_code}', u]) || 'ERR'; } catch (e) { c = 'ERR'; }
+  if (c !== 200 && c !== 'NO-HEADWORD') browserList.push(u); else out[u] = c; });
+const done = () => { fs.writeFileSync(file, JSON.stringify(out, null, 1)); const bad = Object.entries(out).filter(([u, c]) => c !== 200 && c !== 'manual-200'); console.log('links', Object.keys(out).length, 'bad', bad.length); bad.forEach(b => console.log(b[1], b[0])); };
+if (!browserList.length) return done();
+(async () => { const { chromium } = require('playwright-core'); const exe = ['/usr/bin/google-chrome', '/usr/bin/chromium'].find(f => fs.existsSync(f));
+  const b = await chromium.launch({ executablePath: exe, headless: false, args: ['--no-sandbox', '--disable-blink-features=AutomationControlled'] }); const p = await b.newPage();
+  for (const u of browserList) { let c = 'ERR'; try { const r = await p.goto(u, { waitUntil: 'domcontentloaded', timeout: 40000 }); let t = await p.title();
+      for (let k = 0; k < 10 && /just a moment|attention required/i.test(t); k++) { await p.waitForTimeout(1500); t = await p.title(); }
+      const st = r ? r.status() : 0; c = /just a moment|error|not found|404|page unavailable|attention required/i.test(t) || (st >= 400 && st !== 403) ? 'BAD:' + st + ':' + t.slice(0, 40) : 200; } catch (e) { c = 'ERR'; }
+    out[u] = c; process.stdout.write(c === 200 ? '.' : 'x'); }
+  await b.close(); console.log(); done(); })();

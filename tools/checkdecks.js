@@ -61,6 +61,18 @@ function check(verbose) {
     Object.entries(fw).forEach(([k, v]) => { if (v[0] >= 6 && (v[1] / v[0] >= 0.7)) errs.push(d.id + ': first word "' + k + '" is the answer ' + v[1] + ' of ' + v[0] + ' times'); });
     Object.keys(ru).forEach(k => { const p = ru[k] / m; if (verbose) console.log(d.id, 'tell rule', k, (p * 100).toFixed(1) + '%'); if (p > 0.45) errs.push(d.id + ': tell rule ' + k + ' ' + (p * 100).toFixed(1) + '% (limit 45%)'); });
   });
+  // No Wikipedia or wiki mirrors anywhere (Tom, Oct 27).
+  const WIKI = /wikipedia|wikimedia|wiktionary|wikiwand|wikidata|wikibooks|wikisource|wikivoyage|newworldencyclopedia|fandom\.com|\/wiki\//i;
+  Object.values(MG.decks).forEach(d => { (d.cards || []).forEach(c => (c.src || []).forEach(u => { if (WIKI.test(u)) errs.push(d.id + ' ' + c.id + ': wiki source ' + u); })); (d.formulas || []).concat(d.dropped || []).forEach(x => { if (WIKI.test(x.url || x.src || '')) errs.push(d.id + ': wiki source ' + (x.url || x.src)); }); });
+  (MG.herbSources || []).forEach(s => { if (WIKI.test(s[1])) errs.push('herbSources: wiki source ' + s[1]); });
+  // Right-answer position must be about uniform per deck and per set, the way the app builds questions (consecutive seeds).
+  const POS = {}; Object.values(MG.decks).filter(d => d.cards && d.cards.length).forEach(d => { const groups = { all: d.cards }; (d.sets || []).forEach(s => groups[s] = d.cards.filter(c => c.set === s));
+    Object.entries(groups).forEach(([g, cards]) => { if (!cards.length) return; const cnt = [0, 0, 0]; let seed = 1000; const rounds = Math.ceil(3000 / cards.length);
+      for (let k = 0; k < rounds; k++) cards.forEach(c => { const r = E.rng(seed++), q = d.id === 'herbs' ? E.question(c, d.cards, r) : E.mcq(c, r); cnt[q.answer]++; });
+      const tot = cnt[0] + cnt[1] + cnt[2], pct = cnt.map(x => x / tot); if (g === 'all') POS[d.id] = pct.map(x => (x * 100).toFixed(1) + '%').join(' / ');
+      if (pct.some(x => x < 0.28 || x > 0.39)) errs.push(d.id + ' ' + g + ': answer position not uniform ' + pct.map(x => (x * 100).toFixed(1)).join('/'));
+      const st = [0, 0, 0]; cards.forEach(c => { if (c.q) st[E.mcq(c).answer]++; }); if (cards[0].q && cards.length >= 30 && st.some(x => x / cards.length > 0.45)) errs.push(d.id + ' ' + g + ': stored answer slots unbalanced ' + st); }); });
+  if (verbose) Object.entries(POS).forEach(([k, v]) => console.log('answer position A/B/C', k, v));
   return [...new Set(errs)];
 }
 exports.check = check;

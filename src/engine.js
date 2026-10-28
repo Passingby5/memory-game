@@ -3,13 +3,25 @@ var MG = typeof MG !== 'undefined' ? MG : {};
 (function () {
   var E = MG.E = {};
   E.SAVE_VERSION = 2; E.SAVE_KEY = 'mg_save';
-  E.rng = function (seed) { var s = (seed >>> 0) || 1; return function () { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; }; };
+  // Seeds are mixed (murmur3 finalizer) and the first outputs dropped, so nearby seeds (12345, 12346...) do not give
+  // nearly the same first numbers. Before v10 they did, which put the right answer in the same slot again and again.
+  E.mix = function (h) { h = (h >>> 0) ^ 0x9e3779b9; h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) || 1; };
+  E.rng = function (seed) { var s = E.mix(seed); for (var k = 0; k < 4; k++) { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; } return function () { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; }; };
   E.shuffle = function (a, r) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
   // Leitner: 5 boxes; box n is due again after INTERVAL[n] days. Right moves up one box, wrong goes back to box 1.
   E.INTERVAL = [0, 0, 1, 3, 7, 14]; E.DAY = 86400000;
-  E.newState = function () { return { v: E.SAVE_VERSION, seed: 12345, boxes: {}, stats: { right: 0, wrong: 0 }, session: null, best: {} }; };
+  // Each new install starts from a random seed so question order differs between people and sessions (tests pass their own seed).
+  E.freshSeed = function () { try { if (typeof crypto !== 'undefined' && crypto.getRandomValues) return crypto.getRandomValues(new Uint32Array(1))[0] || 1; } catch (e) {} return (Date.now() ^ Math.floor(Math.random() * 4294967296)) >>> 0 || 1; };
+  E.newState = function () { return { v: E.SAVE_VERSION, seed: E.freshSeed(), boxes: {}, stats: { right: 0, wrong: 0 }, session: null, best: {} }; };
   E.grade = function (st, id, ok, now) { var b = st.boxes[id] || { box: 1, due: 0 }; b.box = ok ? Math.min(5, b.box + 1) : 1; b.due = now + E.INTERVAL[b.box] * E.DAY; st.boxes[id] = b; st.stats[ok ? 'right' : 'wrong']++; return b; };
   E.dueCards = function (st, cards, now) { return cards.filter(function (c) { var b = st.boxes[c.id]; return !b || b.due <= now; }).sort(function (a, b) { var x = st.boxes[a.id], y = st.boxes[b.id]; return (x ? x.box : 0) - (y ? y.box : 0); }); };
+  // Session picker: due cards first, lowest Leitner box first; ties and unseen cards are shuffled, so each session gets a new mix.
+  E.pickSession = function (st, all, now, r, n) { var bx = function (c) { var b = st.boxes[c.id]; return b ? b.box : 0; };
+    var due = E.shuffle(E.dueCards(st, all, now), r).sort(function (a, b) { return bx(a) - bx(b); });
+    var seen = due.filter(function (c) { return st.boxes[c.id]; }), fresh = due.filter(function (c) { return !st.boxes[c.id]; });
+    var out = seen.concat(fresh); if (out.length < n) out = out.concat(E.shuffle(all.filter(function (c) { return out.indexOf(c) < 0; }), r));
+    out = out.slice(0, n); var missed = out.filter(function (c) { return bx(c) === 1; });
+    return missed.concat(E.shuffle(out.filter(function (c) { return bx(c) !== 1; }), r)).map(function (c) { return c.id; }); };
   // Save versioning: v1 kept a flat {leitner:{id:box}}; v2 stores {box,due}. Unknown or broken saves start fresh.
   E.migrate = function (raw, decks) {
     var s; try { s = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { return E.newState(); }
@@ -51,7 +63,9 @@ var MG = typeof MG !== 'undefined' ? MG : {};
   // Remove the herb's own name from the clue so the prompt never gives away the answer.
   E.mask = function (t, card) { var n = card.name.replace(/\s*\(.*\)/, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); return t.replace(new RegExp('\\b' + n + '\\b', 'gi'), 'this herb'); };
   // Generic multiple choice card {q, a, w:[2]}: choices are the answer plus two wrong answers, shuffled by the seeded RNG.
-  E.mcq = function (card, r) { var ch = E.shuffle([card.a].concat(card.w), r); return { kind: 'mcq', id: card.id, prompt: card.q, choices: ch, answer: ch.indexOf(card.a) }; };
+  E.mcq = function (card, r) { var ch; if (r) ch = E.shuffle([card.a].concat(card.w), r); else { ch = card.w.slice(); ch.splice(E.slot(card.id), 0, card.a); } return { kind: 'mcq', id: card.id, prompt: card.q, choices: ch, answer: ch.indexOf(card.a) }; };
+  // Stored (no-RNG) answer slot, from a hash of the card id, so stored order is balanced too (about a third each).
+  E.slot = function (id) { var h = 7; for (var i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619); return E.mix(h) % 3; };
   // Trainers. Digit span: random digits; length goes up after a right answer, down after a wrong one (minimum 3).
   E.digits = function (r, n) { var s = ''; for (var i = 0; i < n; i++) s += Math.floor(r() * 10); return s; };
   E.spanNext = function (len, ok) { return ok ? len + 1 : Math.max(3, len - 1); };
